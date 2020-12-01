@@ -1,3 +1,5 @@
+#![feature(const_raw_ptr_deref)]
+
 // Copyright (C) 2010 m4v <lambdae2@gmail.com>
 // Copyright (C) 2011 stfn <stfnmd@googlemail.com>
 // Copyright (C) 2009-2014 Sébastien Helleu <flashcode@flashtux.org>

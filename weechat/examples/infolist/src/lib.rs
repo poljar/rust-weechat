@@ -1,3 +1,5 @@
+#![feature(const_raw_ptr_deref)]
+
 // Copyright (C) 2008-2018 Sébastien Helleu <flashcode@flashtux.org>
 // Copyright (C) 2020 Damir Jelić <poljar@termina.org.uk>
 //

@@ -1,3 +1,5 @@
+#![feature(const_raw_ptr_deref)]
+
 mod buffer;
 
 use clap::{App, Arg};
