@@ -1,3 +1,5 @@
+#![feature(const_raw_ptr_deref)]
+
 use std::{borrow::Cow, time::Instant};
 use weechat::{
     buffer::{Buffer, BufferBuilder, NickSettings},
@@ -154,9 +156,9 @@ impl Drop for SamplePlugin {
 
 plugin!(
     SamplePlugin,
-    name: "rust_sample",
-    author: "Damir Jelić <poljar@termina.org.uk>",
+    name: env!("CARGO_PKG_NAME"),
+    author: env!("CARGO_PKG_AUTHORS"),
     description: "",
-    version: "0.1.0",
+    version: env!("CARGO_PKG_VERSION"),
     license: "MIT"
 );

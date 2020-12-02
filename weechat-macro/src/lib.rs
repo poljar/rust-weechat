@@ -1,46 +1,57 @@
 #![recursion_limit = "256"]
 
 extern crate proc_macro;
-use proc_macro2::{Ident, Literal};
+use proc_macro2::{Ident, TokenStream};
 use std::collections::HashMap;
 
 use syn::{
     parse::{Parse, ParseStream, Result},
     parse_macro_input,
     punctuated::Punctuated,
-    Error, LitStr,
+    Error, Expr,
 };
 
 use quote::quote;
 
 struct WeechatPluginInfo {
     plugin: syn::Ident,
-    name: (usize, Literal),
-    author: (usize, Literal),
-    description: (usize, Literal),
-    version: (usize, Literal),
-    license: (usize, Literal),
+
+    // The first TokenStream is an expression that yields a usize, the second yields a string
+    // literal (possibly via a macro)
+    name: (TokenStream, TokenStream),
+    author: (TokenStream, TokenStream),
+    description: (TokenStream, TokenStream),
+    version: (TokenStream, TokenStream),
+    license: (TokenStream, TokenStream),
 }
 
 enum WeechatVariable {
-    Name(syn::LitStr),
-    Author(syn::LitStr),
-    Description(syn::LitStr),
-    Version(syn::LitStr),
-    License(syn::LitStr),
+    Name(syn::Expr),
+    Author(syn::Expr),
+    Description(syn::Expr),
+    Version(syn::Expr),
+    License(syn::Expr),
 }
 
 impl WeechatVariable {
     #[allow(clippy::wrong_self_convention)]
-    fn to_pair(string: &LitStr) -> (usize, Literal) {
-        let mut bytes = string.value().into_bytes();
-        // Push a null byte since this goes to the C side.
-        bytes.push(0);
+    fn to_pair(string: &Expr) -> (TokenStream, TokenStream) {
+        // This will initialize the value of the statics weechat needs to read
+        let init = quote! {
+            // concat!() works on string literals (which may be created via another macro)
+            ::std::concat!(#string, "\0").as_bytes()
+        };
 
-        (bytes.len(), Literal::byte_string(&bytes))
+        // Luckily, this works in a const context so we can use it to get how long our array needs
+        // to be
+        let len = quote! {
+            #init.len()
+        };
+
+        (len, init)
     }
 
-    fn as_pair(&self) -> (usize, Literal) {
+    fn as_pair(&self) -> (TokenStream, TokenStream) {
         match self {
             WeechatVariable::Name(string) => WeechatVariable::to_pair(string),
             WeechatVariable::Author(string) => WeechatVariable::to_pair(string),
@@ -50,9 +61,16 @@ impl WeechatVariable {
         }
     }
 
-    fn default_literal() -> (usize, Literal) {
-        let bytes = vec![0];
-        (bytes.len(), Literal::byte_string(&bytes))
+    fn default_literal() -> (TokenStream, TokenStream) {
+        let init = quote! {
+            ::std::concat!("", "\0").as_bytes()
+        };
+
+        let len = quote! {
+            #init.len()
+        };
+
+        (len, init)
     }
 }
 
@@ -60,7 +78,7 @@ impl Parse for WeechatVariable {
     fn parse(input: ParseStream) -> Result<Self> {
         let key: Ident = input.parse()?;
         input.parse::<syn::Token![:]>()?;
-        let value = input.parse()?;
+        let value: syn::Expr = input.parse()?;
 
         match key.to_string().to_lowercase().as_ref() {
             "name" => Ok(WeechatVariable::Name(value)),
@@ -174,25 +192,29 @@ pub fn plugin(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         pub static weechat_plugin_api_version: [u8; weechat::weechat_sys::WEECHAT_PLUGIN_API_VERSION_LENGTH] =
             *weechat::weechat_sys::WEECHAT_PLUGIN_API_VERSION;
 
-        #[doc(hidden)]
-        #[no_mangle]
-        pub static weechat_plugin_name: [u8; #name_len] = *#name;
+        // Each of these unsafe blocks is the reason this generates code only usable on a nightly compiler:
+        // raw pointer dereferences specifically in const/static contexts is unstable. See this issue:
+        // https://github.com/rust-lang/rust/issues/51911
 
         #[doc(hidden)]
         #[no_mangle]
-        pub static weechat_plugin_author: [u8; #author_len] = *#author;
+        pub static weechat_plugin_name: [u8; #name_len] = unsafe { *(#name.as_ptr() as *const [u8; #name_len]) };
 
         #[doc(hidden)]
         #[no_mangle]
-        pub static weechat_plugin_description: [u8; #description_len] = *#description;
+        pub static weechat_plugin_author: [u8; #author_len] = unsafe { *(#author.as_ptr() as *const [u8; #author_len]) };
 
         #[doc(hidden)]
         #[no_mangle]
-        pub static weechat_plugin_version: [u8; #version_len] = *#version;
+        pub static weechat_plugin_description: [u8; #description_len] = unsafe { *(#description.as_ptr() as *const [u8; #description_len]) };
 
         #[doc(hidden)]
         #[no_mangle]
-        pub static weechat_plugin_license: [u8; #license_len] = *#license;
+        pub static weechat_plugin_version: [u8; #version_len] = unsafe { *(#version.as_ptr() as *const [u8; #version_len]) };
+
+        #[doc(hidden)]
+        #[no_mangle]
+        pub static weechat_plugin_license: [u8; #license_len] = unsafe { *(#license.as_ptr() as *const [u8; #license_len]) };
 
         #[doc(hidden)]
         static mut __PLUGIN: Option<#plugin> = None;
