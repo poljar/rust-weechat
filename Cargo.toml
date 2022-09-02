@@ -1,10 +1,7 @@
 [workspace]
 
 members = [
-    "weechat-sys",
-    "weechat-macro",
-    "weechat",
-    "weechat/examples/*",
+    "crates/*",
 ]
 
 [profile.release]
