@@ -1,10 +1,10 @@
-use bindgen::Bindings;
+use bindgen::{BindgenError, Bindings};
 use std::{env, path::PathBuf};
 
 const WEECHAT_BUNDLED_ENV: &str = "WEECHAT_BUNDLED";
 const WEECHAT_PLUGIN_FILE_ENV: &str = "WEECHAT_PLUGIN_FILE";
 
-fn build(file: &str) -> Result<Bindings, ()> {
+fn build(file: &str) -> Result<Bindings, BindgenError> {
     const INCLUDED_TYPES: &[&str] = &[
         "t_weechat_plugin",
         "t_gui_buffer",

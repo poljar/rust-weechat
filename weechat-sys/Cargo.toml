@@ -9,7 +9,7 @@ readme = "README.md"
 repository = "https://github.com/poljar/rust-weechat"
 
 [build-dependencies]
-bindgen = "0.58.1"
+bindgen = "0.60.1"
 
 [dependencies]
-libc = "0.2.93"
+libc = "0.2.132"
