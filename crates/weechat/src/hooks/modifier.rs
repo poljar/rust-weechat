@@ -1,6 +1,6 @@
-use libc::c_char;
 use std::{borrow::Cow, ffi::CStr, os::raw::c_void, ptr};
 
+use libc::c_char;
 use weechat_sys::{t_gui_buffer, t_weechat_plugin};
 
 use super::Hook;
@@ -65,9 +65,7 @@ impl<'a> ModifierData<'a> {
             } else {
                 let ptr = u64::from_str_radix(&modifier_data[2..], 16).ok()?;
 
-                Some(ModifierData::Buffer(
-                    weechat.buffer_from_ptr(ptr as *mut t_gui_buffer),
-                ))
+                Some(ModifierData::Buffer(weechat.buffer_from_ptr(ptr as *mut t_gui_buffer)))
             }
         } else {
             Some(ModifierData::String(modifier_data))
@@ -200,10 +198,8 @@ impl ModifierHook {
         Weechat::check_thread();
         let weechat = unsafe { Weechat::weechat() };
 
-        let data = Box::new(ModifierHookData {
-            callback: Box::new(callback),
-            weechat_ptr: weechat.ptr,
-        });
+        let data =
+            Box::new(ModifierHookData { callback: Box::new(callback), weechat_ptr: weechat.ptr });
 
         let data_ref = Box::leak(data);
         let hook_modifier = weechat.get().hook_modifier.unwrap();
@@ -221,18 +217,12 @@ impl ModifierHook {
         };
 
         let hook_data = unsafe { Box::from_raw(data_ref) };
-        let hook = Hook {
-            ptr: hook_ptr,
-            weechat_ptr: weechat.ptr,
-        };
+        let hook = Hook { ptr: hook_ptr, weechat_ptr: weechat.ptr };
 
         if hook_ptr.is_null() {
             Err(())
         } else {
-            Ok(Self {
-                _hook: hook,
-                _hook_data: hook_data,
-            })
+            Ok(Self { _hook: hook, _hook_data: hook_data })
         }
     }
 }

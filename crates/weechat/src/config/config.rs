@@ -118,7 +118,8 @@ impl Weechat {
     /// Search an option with a full name.
     /// # Arguments
     ///
-    /// * `option_name` - The full name of the option that should be searched for
+    /// * `option_name` - The full name of the option that should be searched
+    ///   for
     /// (format: "file.section.option").
     pub fn config_get(&self, option_name: &str) -> Option<ConfigOption> {
         let weechat = Weechat::from_ptr(self.ptr);
@@ -133,11 +134,7 @@ impl Weechat {
 
         let option_type = weechat.config_option_get_string(ptr, "type").unwrap();
 
-        Some(Config::option_from_type_and_ptr(
-            self.ptr,
-            ptr,
-            option_type.as_ref(),
-        ))
+        Some(Config::option_from_type_and_ptr(self.ptr, ptr, option_type.as_ref()))
     }
 
     /// Get value of a plugin option
@@ -250,10 +247,7 @@ impl Config {
                 .reload_cb
                 .as_mut()
                 .expect("C callback was set while no rust callback");
-            let conf = Conf {
-                ptr: config_pointer,
-                weechat_ptr: pointers.weechat_ptr,
-            };
+            let conf = Conf { ptr: config_pointer, weechat_ptr: pointers.weechat_ptr };
 
             let weechat = Weechat::from_ptr(pointers.weechat_ptr);
 
@@ -272,10 +266,8 @@ impl Config {
             None => None,
         };
 
-        let config_pointers = Box::new(ConfigPointers {
-            reload_cb: callback,
-            weechat_ptr: weechat.ptr,
-        });
+        let config_pointers =
+            Box::new(ConfigPointers { reload_cb: callback, weechat_ptr: weechat.ptr });
         let config_pointers_ref = Box::leak(config_pointers);
 
         let config_new = weechat.get().config_new.unwrap();
@@ -296,10 +288,7 @@ impl Config {
         };
 
         Ok(Config {
-            inner: Conf {
-                ptr: config_ptr,
-                weechat_ptr: weechat.ptr,
-            },
+            inner: Conf { ptr: config_ptr, weechat_ptr: weechat.ptr },
             _config_data: config_pointers_ref,
             sections: HashMap::new(),
         })
@@ -394,10 +383,7 @@ impl Config {
             let pointers: &mut ConfigSectionPointers =
                 { &mut *(pointer as *mut ConfigSectionPointers) };
 
-            let conf = Conf {
-                ptr: config,
-                weechat_ptr: pointers.weechat_ptr,
-            };
+            let conf = Conf { ptr: config, weechat_ptr: pointers.weechat_ptr };
             let section = pointers
                 .section
                 .as_ref()
@@ -407,10 +393,8 @@ impl Config {
 
             let weechat = Weechat::from_ptr(pointers.weechat_ptr);
 
-            let cb = pointers
-                .read_cb
-                .as_mut()
-                .expect("C read callback was called but no ruts callback");
+            let cb =
+                pointers.read_cb.as_mut().expect("C read callback was called but no ruts callback");
 
             let ret = cb.callback(
                 &weechat,
@@ -439,10 +423,7 @@ impl Config {
                 .upgrade()
                 .expect("Config has been destroyed but a read callback run");
 
-            let conf = Conf {
-                ptr: config,
-                weechat_ptr: pointers.weechat_ptr,
-            };
+            let conf = Conf { ptr: config, weechat_ptr: pointers.weechat_ptr };
             let weechat = Weechat::from_ptr(pointers.weechat_ptr);
 
             if let Some(ref mut cb) = pointers.write_cb {
@@ -467,10 +448,7 @@ impl Config {
                 .upgrade()
                 .expect("Config has been destroyed but a read callback run");
 
-            let conf = Conf {
-                ptr: config,
-                weechat_ptr: pointers.weechat_ptr,
-            };
+            let conf = Conf { ptr: config, weechat_ptr: pointers.weechat_ptr };
             let weechat = Weechat::from_ptr(pointers.weechat_ptr);
 
             if let Some(ref mut cb) = pointers.write_default_cb {
@@ -556,9 +534,7 @@ impl Config {
         self.sections.insert(section_settings.name.clone(), section);
         let section = &self.sections[&section_settings.name];
 
-        Ok(SectionHandleMut {
-            inner: section.borrow_mut(),
-        })
+        Ok(SectionHandleMut { inner: section.borrow_mut() })
     }
 
     /// Search the configuration object for a section and borrow it.
@@ -578,9 +554,7 @@ impl Config {
         if !self.sections.contains_key(section_name) {
             None
         } else {
-            Some(SectionHandle {
-                inner: self.sections[section_name].borrow(),
-            })
+            Some(SectionHandle { inner: self.sections[section_name].borrow() })
         }
     }
 
@@ -601,9 +575,7 @@ impl Config {
         if !self.sections.contains_key(section_name) {
             None
         } else {
-            Some(SectionHandleMut {
-                inner: self.sections[section_name].borrow_mut(),
-            })
+            Some(SectionHandleMut { inner: self.sections[section_name].borrow_mut() })
         }
     }
 }
@@ -618,8 +590,8 @@ impl Conf {
     ///
     /// # Arguments
     ///
-    /// * `key` - The key of the option that will be written. Can be a
-    ///     section name.
+    /// * `key` - The key of the option that will be written. Can be a section
+    ///   name.
     ///
     /// * `value` - The value of the option that will be written.
     pub fn write_line(&self, key: &str, value: &str) {

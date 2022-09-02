@@ -1,5 +1,6 @@
-use bindgen::{BindgenError, Bindings};
 use std::{env, path::PathBuf};
+
+use bindgen::{BindgenError, Bindings};
 
 const WEECHAT_BUNDLED_ENV: &str = "WEECHAT_BUNDLED";
 const WEECHAT_PLUGIN_FILE_ENV: &str = "WEECHAT_PLUGIN_FILE";
@@ -55,9 +56,7 @@ fn main() {
     } else {
         match plugin_file {
             Ok(file) => {
-                let path = PathBuf::from(file)
-                    .canonicalize()
-                    .expect("Can't canonicalize path");
+                let path = PathBuf::from(file).canonicalize().expect("Can't canonicalize path");
                 build(path.to_str().unwrap_or_default()).unwrap_or_else(|_| {
                     panic!("Unable to generate bindings with the provided {:?}", path)
                 })
@@ -77,7 +76,5 @@ fn main() {
     println!("cargo:rerun-if-env-changed={}", WEECHAT_PLUGIN_FILE_ENV);
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
+    bindings.write_to_file(out_path.join("bindings.rs")).expect("Couldn't write bindings!");
 }

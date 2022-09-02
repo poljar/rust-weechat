@@ -1,6 +1,8 @@
-use crate::{config::OptionChanged, LossyCString, Weechat};
 use std::{borrow::Cow, convert::TryFrom, ffi::CStr};
+
 use weechat_sys::{t_config_option, t_weechat_plugin};
+
+use crate::{config::OptionChanged, LossyCString, Weechat};
 
 #[derive(Debug, PartialEq, Clone)]
 #[allow(missing_docs)]
@@ -76,33 +78,27 @@ pub trait HidenConfigOptionT {
 pub trait BaseConfigOption: HidenConfigOptionT {
     /// Get the name of the option.
     fn name(&self) -> Cow<str> {
-        self.get_string("name")
-            .expect("Can't get the name of the option")
+        self.get_string("name").expect("Can't get the name of the option")
     }
 
     /// Get the description of the option.
     fn description(&self) -> Cow<str> {
-        self.get_string("description")
-            .expect("Can't get the description of the option")
+        self.get_string("description").expect("Can't get the description of the option")
     }
 
     /// Get the section name of the section the option belongs to.
     fn section_name(&self) -> Cow<str> {
-        self.get_string("section_name")
-            .expect("Can't get the section name of the option")
+        self.get_string("section_name").expect("Can't get the section name of the option")
     }
 
     /// Get the config name the option belongs to.
     fn config_name(&self) -> Cow<str> {
-        self.get_string("config_name")
-            .expect("Can't get the config name of the option")
+        self.get_string("config_name").expect("Can't get the config name of the option")
     }
 
     /// Get the type of the config option
     fn option_type(&self) -> OptionType {
-        let option_type = self
-            .get_string("type")
-            .expect("Can't get the config name of the option");
+        let option_type = self.get_string("type").expect("Can't get the config name of the option");
         OptionType::try_from(option_type.as_ref()).unwrap()
     }
 

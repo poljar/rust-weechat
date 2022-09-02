@@ -1,11 +1,12 @@
-pub use async_task::{Runnable, Task};
-use futures::future::{BoxFuture, Future};
-use pipe_channel::{channel, Receiver, Sender};
 use std::{
     collections::VecDeque,
     panic,
     sync::{Arc, Mutex},
 };
+
+pub use async_task::{Runnable, Task};
+use futures::future::{BoxFuture, Future};
+use pipe_channel::{channel, Receiver, Sender};
 
 use crate::{
     hooks::{FdHook, FdHookCallback, FdHookMode},
@@ -123,18 +124,14 @@ impl WeechatExecutor {
 
             if let Some(q) = queue {
                 let sender = sender.expect("Futures queue exists but the channel got dropped");
-                let mut weechat_notify = sender
-                    .lock()
-                    .expect("Weechat notification sender lock is poisoned");
+                let mut weechat_notify =
+                    sender.lock().expect("Weechat notification sender lock is poisoned");
 
-                let mut queue = q
-                    .lock()
-                    .expect("Lock of the future queue of the Weechat executor is poisoned");
+                let mut queue =
+                    q.lock().expect("Lock of the future queue of the Weechat executor is poisoned");
 
                 queue.push_back(ExecutorJob::Job(runnable));
-                weechat_notify
-                    .send(())
-                    .expect("Can't notify Weechat to run a future");
+                weechat_notify.send(()).expect("Can't notify Weechat to run a future");
             }
         };
 
@@ -207,21 +204,14 @@ impl WeechatExecutor {
 
             if let Some(q) = queue {
                 let sender = sender.expect("Futures queue exists but the channel got dropped");
-                let mut weechat_notify = sender
-                    .lock()
-                    .expect("Weechat notification sender lock is poisoned");
+                let mut weechat_notify =
+                    sender.lock().expect("Weechat notification sender lock is poisoned");
 
-                let mut queue = q
-                    .lock()
-                    .expect("Lock of the future queue of the Weechat executor is poisoned");
+                let mut queue =
+                    q.lock().expect("Lock of the future queue of the Weechat executor is poisoned");
 
-                queue.push_back(ExecutorJob::BufferJob(BufferJob(
-                    runnable,
-                    buffer_name.clone(),
-                )));
-                weechat_notify
-                    .send(())
-                    .expect("Can't notify Weechat to run a future");
+                queue.push_back(ExecutorJob::BufferJob(BufferJob(runnable, buffer_name.clone())));
+                weechat_notify.send(()).expect("Can't notify Weechat to run a future");
             }
         };
 

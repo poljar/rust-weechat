@@ -1,6 +1,6 @@
-use libc::c_int;
 use std::{os::raw::c_void, ptr, time::Duration};
 
+use libc::c_int;
 use weechat_sys::{t_weechat_plugin, WEECHAT_RC_OK};
 
 use super::Hook;
@@ -63,15 +63,14 @@ impl TimerHook {
     /// * `interval` - The delay between calls in milliseconds.
     ///
     /// * `align_second` - The alignment on a second. For example, if the
-    ///     current time is 09:00, if the interval = 60000 (60 seconds), and
-    ///     align_second = 60, then timer is called each minute on the 0th
-    ///     second.
+    ///   current time is 09:00, if the interval = 60000 (60 seconds), and
+    ///   align_second = 60, then timer is called each minute on the 0th second.
     ///
     /// * `max_calls` - The number of times the callback should be called, 0
-    ///     means it's called forever.
+    ///   means it's called forever.
     ///
     /// * `callback` - A function that will be called when the timer fires, the
-    ///     `remaining` argument will be -1 if the timer has no end.
+    ///   `remaining` argument will be -1 if the timer has no end.
     ///
     /// # Panics
     ///
@@ -104,10 +103,7 @@ impl TimerHook {
             let hook_data: &mut TimerHookData = { &mut *(pointer as *mut TimerHookData) };
             let cb = &mut hook_data.callback;
 
-            cb.callback(
-                &Weechat::from_ptr(hook_data.weechat_ptr),
-                RemainingCalls::from(remaining),
-            );
+            cb.callback(&Weechat::from_ptr(hook_data.weechat_ptr), RemainingCalls::from(remaining));
 
             WEECHAT_RC_OK
         }
@@ -115,10 +111,8 @@ impl TimerHook {
         Weechat::check_thread();
         let weechat = unsafe { Weechat::weechat() };
 
-        let data = Box::new(TimerHookData {
-            callback: Box::new(callback),
-            weechat_ptr: weechat.ptr,
-        });
+        let data =
+            Box::new(TimerHookData { callback: Box::new(callback), weechat_ptr: weechat.ptr });
 
         let data_ref = Box::leak(data);
         let hook_timer = weechat.get().hook_timer.unwrap();
@@ -140,10 +134,7 @@ impl TimerHook {
             Err(())
         } else {
             Ok(TimerHook {
-                _hook: Hook {
-                    ptr: hook_ptr,
-                    weechat_ptr: weechat.ptr,
-                },
+                _hook: Hook { ptr: hook_ptr, weechat_ptr: weechat.ptr },
                 _hook_data: hook_data,
             })
         }

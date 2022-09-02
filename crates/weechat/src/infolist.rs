@@ -186,10 +186,7 @@ impl<'a> InfolistItem<'a> {
     /// }
     /// ```
     pub fn iter(&'a self) -> Iter<'a> {
-        Iter {
-            keys: self.fields.clone().into_iter(),
-            item: &self,
-        }
+        Iter { keys: self.fields.clone().into_iter(), item: &self }
     }
 }
 
@@ -342,11 +339,8 @@ impl Weechat {
         let infolist_get = self.get().infolist_get.unwrap();
 
         let name = LossyCString::new(infolist_name);
-        let arguments = if let Some(args) = arguments {
-            Some(LossyCString::new(args))
-        } else {
-            None
-        };
+        let arguments =
+            if let Some(args) = arguments { Some(LossyCString::new(args)) } else { None };
 
         let infolist_ptr = unsafe {
             infolist_get(

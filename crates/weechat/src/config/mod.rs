@@ -21,7 +21,6 @@
 //! }
 //!
 //! config.read().expect("Can't read config");
-//!
 //! ```
 
 mod boolean;
@@ -37,14 +36,11 @@ pub use crate::config::{
     boolean::{BooleanOption, BooleanOptionSettings},
     color::{ColorOption, ColorOptionSettings},
     config::{Conf, Config, ConfigReloadCallback, OptionChanged},
-    integer::{IntegerOption, IntegerOptionSettings},
-    string::{StringOption, StringOptionSettings},
-};
-
-pub use crate::config::{
     config_options::{BaseConfigOption, ConfigOptions, OptionType},
+    integer::{IntegerOption, IntegerOptionSettings},
     section::{
         ConfigOption, ConfigSection, ConfigSectionSettings, SectionHandle, SectionHandleMut,
         SectionReadCallback, SectionWriteCallback, SectionWriteDefaultCallback,
     },
+    string::{StringOption, StringOptionSettings},
 };

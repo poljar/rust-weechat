@@ -1,7 +1,8 @@
 use std::{borrow::Cow, collections::HashMap, ffi::c_void, marker::PhantomData};
 
-use crate::{buffer::Buffer, Weechat};
 use weechat_sys::{t_hdata, t_weechat_plugin};
+
+use crate::{buffer::Buffer, Weechat};
 
 /// An iterator that steps over the lines of the buffer.
 pub struct BufferLines<'a> {
@@ -36,11 +37,7 @@ impl<'a> Iterator for BufferLines<'a> {
 
             self.first_line = unsafe { weechat.hdata_move(line_hdata, self.first_line, 1) };
 
-            Some(BufferLine {
-                weechat,
-                line_data_pointer,
-                buffer: PhantomData,
-            })
+            Some(BufferLine { weechat, line_data_pointer, buffer: PhantomData })
         }
     }
 }
@@ -67,11 +64,7 @@ impl<'a> DoubleEndedIterator for BufferLines<'a> {
 
             self.last_line = unsafe { weechat.hdata_move(line_hdata, self.last_line, -1) };
 
-            Some(BufferLine {
-                weechat,
-                line_data_pointer,
-                buffer: PhantomData,
-            })
+            Some(BufferLine { weechat, line_data_pointer, buffer: PhantomData })
         }
     }
 }
@@ -102,18 +95,14 @@ impl<'a> BufferLine<'a> {
 
     fn update_line(&self, hashmap: HashMap<&str, &str>) {
         unsafe {
-            self.weechat
-                .hdata_update(self.hdata(), self.line_data_pointer, hashmap);
+            self.weechat.hdata_update(self.hdata(), self.line_data_pointer, hashmap);
         }
     }
 
     /// Get the prefix of the line, everything left of the message separator
     /// (usually `|`) is considered the prefix.
     pub fn prefix(&self) -> Cow<str> {
-        unsafe {
-            self.weechat
-                .hdata_string(self.hdata(), self.line_data_pointer, "prefix")
-        }
+        unsafe { self.weechat.hdata_string(self.hdata(), self.line_data_pointer, "prefix") }
     }
 
     /// Set the prefix to the given new value.
@@ -129,10 +118,7 @@ impl<'a> BufferLine<'a> {
 
     /// Get the message of the line.
     pub fn message(&self) -> Cow<str> {
-        unsafe {
-            self.weechat
-                .hdata_string(self.hdata(), self.line_data_pointer, "message")
-        }
+        unsafe { self.weechat.hdata_string(self.hdata(), self.line_data_pointer, "message") }
     }
 
     /// Set the message to the given new value.
@@ -149,10 +135,7 @@ impl<'a> BufferLine<'a> {
 
     /// Get the date of the line.
     pub fn date(&self) -> i64 {
-        unsafe {
-            self.weechat
-                .hdata_time(self.hdata(), self.line_data_pointer, "date")
-        }
+        unsafe { self.weechat.hdata_time(self.hdata(), self.line_data_pointer, "date") }
     }
 
     /// Set the date to the given new value.
@@ -169,10 +152,7 @@ impl<'a> BufferLine<'a> {
 
     /// Get the date the line was printed.
     pub fn date_printed(&self) -> i64 {
-        unsafe {
-            self.weechat
-                .hdata_time(self.hdata(), self.line_data_pointer, "date_printed")
-        }
+        unsafe { self.weechat.hdata_time(self.hdata(), self.line_data_pointer, "date_printed") }
     }
 
     /// Set the date the line was printed to the given new value.
@@ -189,11 +169,7 @@ impl<'a> BufferLine<'a> {
 
     /// Is the line highlighted.
     pub fn highlighted(&self) -> bool {
-        unsafe {
-            self.weechat
-                .hdata_char(self.hdata(), self.line_data_pointer, "highlight")
-                != 0
-        }
+        unsafe { self.weechat.hdata_char(self.hdata(), self.line_data_pointer, "highlight") != 0 }
     }
 
     /// Get the list of tags of the line.
@@ -236,7 +212,7 @@ impl<'a> BufferLine<'a> {
     ///
     /// # Arguments
     /// * `data` - `LineData` that contains new values that should be set on the
-    ///     line.
+    ///   line.
     ///
     /// # Example
     /// ```no_run

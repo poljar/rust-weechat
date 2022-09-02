@@ -1,11 +1,10 @@
-use libc::{c_char, c_int};
 use std::{borrow::Cow, ffi::CStr, os::raw::c_void, ptr};
 
+use libc::{c_char, c_int};
 use weechat_sys::{t_gui_buffer, t_weechat_plugin, WEECHAT_RC_OK};
 
-use crate::{buffer::Buffer, Args, LossyCString, ReturnCode, Weechat};
-
 use super::Hook;
+use crate::{buffer::Buffer, Args, LossyCString, ReturnCode, Weechat};
 
 /// Hook for a weechat command, the command is removed when the object is
 /// dropped.
@@ -28,7 +27,7 @@ pub trait CommandCallback {
     /// * `buffer` - The buffer that received the command.
     ///
     /// * `arguments` - The arguments that were passed to the command, this will
-    ///     include the command as the first argument.
+    ///   include the command as the first argument.
     fn callback(&mut self, weechat: &Weechat, buffer: &Buffer, arguments: Args);
 }
 
@@ -65,10 +64,7 @@ impl CommandSettings {
     ///
     /// * `name` - The name that the section should get.
     pub fn new<P: Into<String>>(name: P) -> Self {
-        CommandSettings {
-            name: name.into(),
-            ..Default::default()
-        }
+        CommandSettings { name: name.into(), ..Default::default() }
     }
 
     /// Set the description of the command.
@@ -99,7 +95,7 @@ impl CommandSettings {
     /// # Arguments
     ///
     /// * `description` - The argument description that should be set for the
-    ///     command.
+    ///   command.
     pub fn arguments_description<T: Into<String>>(mut self, descritpion: T) -> Self {
         self.argument_descriptoin = descritpion.into();
         self
@@ -147,7 +143,7 @@ pub trait CommandRunCallback {
     /// * `buffer` - The buffer that received the command.
     ///
     /// * `command` - The full command that was executed, including its
-    ///     arguments.
+    ///   arguments.
     fn callback(&mut self, weechat: &Weechat, buffer: &Buffer, command: Cow<str>) -> ReturnCode;
 }
 
@@ -208,10 +204,8 @@ impl CommandRun {
         Weechat::check_thread();
         let weechat = unsafe { Weechat::weechat() };
 
-        let data = Box::new(CommandRunHookData {
-            callback: Box::new(callback),
-            weechat_ptr: weechat.ptr,
-        });
+        let data =
+            Box::new(CommandRunHookData { callback: Box::new(callback), weechat_ptr: weechat.ptr });
 
         let data_ref = Box::leak(data);
         let hook_command_run = weechat.get().hook_command_run.unwrap();
@@ -232,15 +226,9 @@ impl CommandRun {
         if hook_ptr.is_null() {
             Err(())
         } else {
-            let hook = Hook {
-                ptr: hook_ptr,
-                weechat_ptr: weechat.ptr,
-            };
+            let hook = Hook { ptr: hook_ptr, weechat_ptr: weechat.ptr };
 
-            Ok(CommandRun {
-                _hook: hook,
-                _hook_data: hook_data,
-            })
+            Ok(CommandRun { _hook: hook, _hook_data: hook_data })
         }
     }
 }
@@ -322,10 +310,8 @@ impl Command {
         let args_description = LossyCString::new(command_settings.argument_descriptoin);
         let completion = LossyCString::new(command_settings.completion.join("||"));
 
-        let data = Box::new(CommandHookData {
-            callback: Box::new(callback),
-            weechat_ptr: weechat.ptr,
-        });
+        let data =
+            Box::new(CommandHookData { callback: Box::new(callback), weechat_ptr: weechat.ptr });
 
         let data_ref = Box::leak(data);
 
@@ -345,18 +331,12 @@ impl Command {
         };
         let hook_data = unsafe { Box::from_raw(data_ref) };
 
-        let hook = Hook {
-            ptr: hook_ptr,
-            weechat_ptr: weechat.ptr,
-        };
+        let hook = Hook { ptr: hook_ptr, weechat_ptr: weechat.ptr };
 
         if hook_ptr.is_null() {
             Err(())
         } else {
-            Ok(Command {
-                _hook: hook,
-                _hook_data: hook_data,
-            })
+            Ok(Command { _hook: hook, _hook_data: hook_data })
         }
     }
 }

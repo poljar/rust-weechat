@@ -1,3 +1,7 @@
+use std::{borrow::Cow, ffi::CStr, marker::PhantomData};
+
+use weechat_sys::{t_config_option, t_weechat_plugin};
+
 use crate::{
     config::{
         config_options::{ConfigOptions, FromPtrs, HidenConfigOptionT},
@@ -5,8 +9,6 @@ use crate::{
     },
     Weechat,
 };
-use std::{borrow::Cow, ffi::CStr, marker::PhantomData};
-use weechat_sys::{t_config_option, t_weechat_plugin};
 
 type StringCheckCb = Option<Box<dyn FnMut(&Weechat, &StringOption, Cow<str>) -> bool>>;
 
@@ -31,10 +33,7 @@ impl StringOptionSettings {
     ///
     /// * `name` - The name of the new option.
     pub fn new<N: Into<String>>(name: N) -> Self {
-        StringOptionSettings {
-            name: name.into(),
-            ..Default::default()
-        }
+        StringOptionSettings { name: name.into(), ..Default::default() }
     }
 
     /// Set the description of the option.
@@ -129,11 +128,7 @@ impl<'a> StringOption<'a> {
 
 impl<'a> FromPtrs for StringOption<'a> {
     fn from_ptrs(option_ptr: *mut t_config_option, weechat_ptr: *mut t_weechat_plugin) -> Self {
-        StringOption {
-            ptr: option_ptr,
-            weechat_ptr,
-            _phantom: PhantomData,
-        }
+        StringOption { ptr: option_ptr, weechat_ptr, _phantom: PhantomData }
     }
 }
 

@@ -2,13 +2,13 @@ use std::{
     cell::{Ref, RefCell, RefMut},
     collections::HashMap,
     ffi::CStr,
+    marker::PhantomData,
     ops::{Deref, DerefMut},
     os::raw::{c_char, c_int, c_void},
     ptr,
     rc::Weak,
 };
 
-use std::marker::PhantomData;
 use weechat_sys::{t_config_file, t_config_option, t_config_section, t_weechat_plugin};
 
 use crate::{
@@ -273,7 +273,8 @@ pub struct ConfigSectionSettings {
     /// A function called when the section is written to the disk
     pub(crate) write_callback: Option<Box<dyn SectionWriteCallback>>,
 
-    /// A function called when default values for the section must be written to the disk
+    /// A function called when default values for the section must be written to
+    /// the disk
     pub(crate) write_default_callback: Option<Box<dyn SectionWriteDefaultCallback>>,
 }
 
@@ -285,10 +286,7 @@ impl ConfigSectionSettings {
     ///
     /// * `name` - The name that the section should get.
     pub fn new<P: Into<String>>(name: P) -> Self {
-        ConfigSectionSettings {
-            name: name.into(),
-            ..Default::default()
-        }
+        ConfigSectionSettings { name: name.into(), ..Default::default() }
     }
 
     /// Set the function that will be called when an option from the section is
@@ -476,11 +474,7 @@ impl ConfigSection {
 
         let option_type = weechat.config_option_get_string(ptr, "type").unwrap();
 
-        Some(Config::option_from_type_and_ptr(
-            self.weechat_ptr,
-            ptr,
-            option_type.as_ref(),
-        ))
+        Some(Config::option_from_type_and_ptr(self.weechat_ptr, ptr, option_type.as_ref()))
     }
 
     /// Create a new string Weechat configuration option.
@@ -518,11 +512,7 @@ impl ConfigSection {
         let option_ptrs = ConfigOptionPointers::String(option_pointers);
         self.option_pointers.insert(settings.name, option_ptrs);
 
-        let option = StringOption {
-            ptr,
-            weechat_ptr: self.weechat_ptr,
-            _phantom: PhantomData,
-        };
+        let option = StringOption { ptr, weechat_ptr: self.weechat_ptr, _phantom: PhantomData };
         Ok(option)
     }
 
@@ -562,11 +552,7 @@ impl ConfigSection {
         let option_ptrs = ConfigOptionPointers::Boolean(option_pointers);
         self.option_pointers.insert(settings.name, option_ptrs);
 
-        let option = BooleanOption {
-            ptr,
-            weechat_ptr: self.weechat_ptr,
-            _phantom: PhantomData,
-        };
+        let option = BooleanOption { ptr, weechat_ptr: self.weechat_ptr, _phantom: PhantomData };
 
         Ok(option)
     }
@@ -608,11 +594,7 @@ impl ConfigSection {
         let option_ptrs = ConfigOptionPointers::Integer(option_pointers);
         self.option_pointers.insert(settings.name, option_ptrs);
 
-        let option = IntegerOption {
-            ptr,
-            weechat_ptr: self.weechat_ptr,
-            _phantom: PhantomData,
-        };
+        let option = IntegerOption { ptr, weechat_ptr: self.weechat_ptr, _phantom: PhantomData };
         Ok(option)
     }
 
@@ -647,11 +629,7 @@ impl ConfigSection {
         let option_ptrs = ConfigOptionPointers::Color(option_pointers);
         self.option_pointers.insert(settings.name, option_ptrs);
 
-        let option = ColorOption {
-            ptr,
-            weechat_ptr: self.weechat_ptr,
-            _phantom: PhantomData,
-        };
+        let option = ColorOption { ptr, weechat_ptr: self.weechat_ptr, _phantom: PhantomData };
         Ok(option)
     }
 

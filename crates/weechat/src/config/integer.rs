@@ -1,3 +1,7 @@
+use std::marker::PhantomData;
+
+use weechat_sys::{t_config_option, t_weechat_plugin};
+
 use crate::{
     config::{
         config_options::{ConfigOptions, FromPtrs, HidenConfigOptionT},
@@ -5,8 +9,6 @@ use crate::{
     },
     Weechat,
 };
-use std::marker::PhantomData;
-use weechat_sys::{t_config_option, t_weechat_plugin};
 
 /// Settings for a new integer option.
 #[derive(Default)]
@@ -33,10 +35,7 @@ impl IntegerOptionSettings {
     ///
     /// * `name` - The name of the new option.
     pub fn new<N: Into<String>>(name: N) -> Self {
-        IntegerOptionSettings {
-            name: name.into(),
-            ..Default::default()
-        }
+        IntegerOptionSettings { name: name.into(), ..Default::default() }
     }
 
     /// Set the description of the option.
@@ -153,11 +152,7 @@ impl<'a> IntegerOption<'a> {
 
 impl<'a> FromPtrs for IntegerOption<'a> {
     fn from_ptrs(option_ptr: *mut t_config_option, weechat_ptr: *mut t_weechat_plugin) -> Self {
-        IntegerOption {
-            ptr: option_ptr,
-            weechat_ptr,
-            _phantom: PhantomData,
-        }
+        IntegerOption { ptr: option_ptr, weechat_ptr, _phantom: PhantomData }
     }
 }
 

@@ -22,8 +22,8 @@ impl<'a> NickGroup<'a> {
 
     /// Get a string property of the nick.
     /// * `property` - The name of the property to get the value for, this can
-    ///     be one of name, color, prefix or prefix_color. If a unknown
-    ///     property is requested an empty string is returned.
+    ///   be one of name, color, prefix or prefix_color. If a unknown property
+    ///   is requested an empty string is returned.
     fn get_string(&self, property: &str) -> Option<Cow<str>> {
         let weechat = self.get_weechat();
         let get_string = weechat.get().nicklist_group_get_string.unwrap();
@@ -74,7 +74,7 @@ impl<'a> NickGroup<'a> {
     /// # Arguments
     ///
     /// * `nick_settings` - Nick arguments struct for the nick that should be
-    ///     added.
+    ///   added.
     ///
     /// Returns the newly created nick if one is created successfully, an empty
     /// error otherwise.

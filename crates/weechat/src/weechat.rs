@@ -1,11 +1,7 @@
 //! Main weechat module
 
-use backtrace::Backtrace;
-
-use weechat_sys::t_weechat_plugin;
-
-use crate::LossyCString;
-use libc::{c_char, c_int};
+#[cfg(feature = "async")]
+use std::future::Future;
 use std::{
     ffi::{CStr, CString},
     panic::PanicInfo,
@@ -14,11 +10,14 @@ use std::{
 };
 
 #[cfg(feature = "async")]
-use crate::executor::WeechatExecutor;
-#[cfg(feature = "async")]
 pub use async_task::Task;
+use backtrace::Backtrace;
+use libc::{c_char, c_int};
+use weechat_sys::t_weechat_plugin;
+
 #[cfg(feature = "async")]
-use std::future::Future;
+use crate::executor::WeechatExecutor;
+use crate::LossyCString;
 
 /// An iterator over the arguments of a Weechat command, yielding a String value
 /// for each argument.
@@ -73,9 +72,7 @@ impl Args {
                 String::from_utf8_lossy(&cstr.to_bytes().to_vec()).to_string()
             })
             .collect();
-        Args {
-            iter: args.into_iter(),
-        }
+        Args { iter: args.into_iter() }
     }
 }
 
@@ -149,9 +146,7 @@ impl Weechat {
         let current_thread_id = current_thread.id();
         let thread_name = current_thread.name().unwrap_or("Unnamed");
 
-        let backtrace = std::env::var("RUST_BACKTRACE")
-            .map(|v| v == "1")
-            .unwrap_or(false);
+        let backtrace = std::env::var("RUST_BACKTRACE").map(|v| v == "1").unwrap_or(false);
 
         if current_thread_id == weechat_thread {
             if backtrace {
@@ -173,11 +168,7 @@ impl Weechat {
         } else {
             #[cfg(feature = "async")]
             {
-                let bt = if backtrace {
-                    Some(Backtrace::new())
-                } else {
-                    None
-                };
+                let bt = if backtrace { Some(Backtrace::new()) } else { None };
 
                 if current_thread_id != weechat_thread {
                     Weechat::spawn_from_thread(Weechat::thread_panic(
@@ -335,9 +326,7 @@ impl Weechat {
         let color_name = LossyCString::new(color_name);
         unsafe {
             let color = weechat_color(color_name.as_ptr());
-            CStr::from_ptr(color)
-                .to_str()
-                .expect("Weechat returned a non UTF-8 string")
+            CStr::from_ptr(color).to_str().expect("Weechat returned a non UTF-8 string")
         }
     }
 
@@ -488,12 +477,8 @@ impl Weechat {
         let path = LossyCString::new("%h");
 
         let path = unsafe {
-            let result = eval_path_home(
-                path.as_ptr(),
-                ptr::null_mut(),
-                ptr::null_mut(),
-                ptr::null_mut(),
-            );
+            let result =
+                eval_path_home(path.as_ptr(), ptr::null_mut(), ptr::null_mut(), ptr::null_mut());
 
             if result.is_null() {
                 panic!("Returned null while evaluating the Weechat home dir");
@@ -539,8 +524,8 @@ impl Weechat {
     ///
     /// # Arguments
     ///
-    /// * `modifier` - The name of a modifier. The list of modifiers can be found in
-    ///     the official
+    /// * `modifier` - The name of a modifier. The list of modifiers can be
+    ///   found in the official
     /// [Weechat documentation](https://weechat.org/files/doc/stable/weechat_plugin_api.en.html#_hook_modifier_exec).
     ///
     /// * `modifier_data` - Data that will be passed to the modifier, this
@@ -567,12 +552,8 @@ impl Weechat {
         let input_string = LossyCString::new(input_string);
 
         unsafe {
-            let result = exec(
-                weechat.ptr,
-                modifier.as_ptr(),
-                modifier_data.as_ptr(),
-                input_string.as_ptr(),
-            );
+            let result =
+                exec(weechat.ptr, modifier.as_ptr(), modifier_data.as_ptr(), input_string.as_ptr());
 
             if result.is_null() {
                 Err(())

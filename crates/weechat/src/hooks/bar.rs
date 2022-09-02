@@ -1,7 +1,8 @@
 //! Bar items are used to display status information in Weechat.
 use core::ptr;
-use libc::c_char;
 use std::os::raw::c_void;
+
+use libc::c_char;
 use weechat_sys::{t_gui_bar_item, t_gui_buffer, t_gui_window, t_hashtable, t_weechat_plugin};
 
 use crate::{buffer::Buffer, LossyCString, Weechat};
@@ -35,8 +36,8 @@ struct BarItemCbData {
     weechat_ptr: *mut t_weechat_plugin,
 }
 
-/// A handle to a bar item. The bar item is automatically removed when the object is
-/// dropped.
+/// A handle to a bar item. The bar item is automatically removed when the
+/// object is dropped.
 pub struct BarItem {
     name: String,
     ptr: *mut t_gui_bar_item,
@@ -76,7 +77,6 @@ impl BarItem {
     ///     "rust/sample".to_owned()
     /// });
     /// ```
-    ///
     // TODO: Provide window object, the callback should accept a Window object
     // wrapping a t_gui_window
     //
@@ -106,10 +106,8 @@ impl BarItem {
         Weechat::check_thread();
         let weechat = unsafe { Weechat::weechat() };
 
-        let data = Box::new(BarItemCbData {
-            callback: Box::new(callback),
-            weechat_ptr: weechat.ptr,
-        });
+        let data =
+            Box::new(BarItemCbData { callback: Box::new(callback), weechat_ptr: weechat.ptr });
 
         let data_ref = Box::leak(data);
         let bar_item_new = weechat.get().bar_item_new.unwrap();

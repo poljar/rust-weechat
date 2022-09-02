@@ -1,7 +1,8 @@
 use std::{borrow::Cow, ffi::CStr, marker::PhantomData};
 
-use crate::{buffer::Buffer, LossyCString, Weechat};
 use weechat_sys::{t_gui_buffer, t_gui_nick, t_weechat_plugin};
+
+use crate::{buffer::Buffer, LossyCString, Weechat};
 
 /// Settings to create a new nick.
 pub struct NickSettings<'a> {
@@ -24,13 +25,7 @@ impl<'a> NickSettings<'a> {
     ///
     /// * `name` - The name of the new nick.
     pub fn new(name: &str) -> NickSettings {
-        NickSettings {
-            name,
-            color: "",
-            prefix: "",
-            prefix_color: "",
-            visible: true,
-        }
+        NickSettings { name, color: "", prefix: "", prefix_color: "", visible: true }
     }
 
     /// Set the color of the nick.
@@ -68,7 +63,7 @@ impl<'a> NickSettings<'a> {
     /// # Arguments
     ///
     /// * `visible` - Should the nick be visible in the nicklist, `true` if it
-    ///     should be visible, false otherwise. Defaults to `true`.
+    ///   should be visible, false otherwise. Defaults to `true`.
     pub fn set_visible(mut self, visible: bool) -> NickSettings<'a> {
         self.visible = visible;
         self
@@ -91,8 +86,8 @@ impl<'a> Nick<'a> {
 
     /// Get a string property of the nick.
     /// * `property` - The name of the property to get the value for, this can
-    ///     be one of name, color, prefix or prefix_color. If a unknown
-    ///     property is requested an empty string is returned.
+    ///   be one of name, color, prefix or prefix_color. If a unknown property
+    ///   is requested an empty string is returned.
     fn get_string(&self, property: &str) -> Option<Cow<str>> {
         let weechat = self.get_weechat();
         let get_string = weechat.get().nicklist_nick_get_string.unwrap();

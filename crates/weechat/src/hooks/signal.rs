@@ -137,9 +137,7 @@ impl<'a> SignalData<'a> {
 
         match data_type {
             "string" => unsafe {
-                Some(SignalData::String(
-                    CStr::from_ptr(data as *const c_char).to_string_lossy(),
-                ))
+                Some(SignalData::String(CStr::from_ptr(data as *const c_char).to_string_lossy()))
             },
             "integer" => {
                 let data = data as *const c_int;
@@ -147,9 +145,7 @@ impl<'a> SignalData<'a> {
             }
             "pointer" => {
                 if SignalData::pointer_is_buffer(signal_name) {
-                    Some(SignalData::Buffer(
-                        weechat.buffer_from_ptr(data as *mut t_gui_buffer),
-                    ))
+                    Some(SignalData::Buffer(weechat.buffer_from_ptr(data as *mut t_gui_buffer)))
                 } else {
                     None
                 }
@@ -228,7 +224,6 @@ impl SignalHook {
     ///         ReturnCode::Ok
     ///     },
     /// );
-    ///
     /// ```
     pub fn new(signal_name: &str, callback: impl SignalCallback + 'static) -> Result<Self, ()> {
         unsafe extern "C" fn c_hook_cb(
@@ -254,10 +249,8 @@ impl SignalHook {
         Weechat::check_thread();
         let weechat = unsafe { Weechat::weechat() };
 
-        let data = Box::new(SignalHookData {
-            callback: Box::new(callback),
-            weechat_ptr: weechat.ptr,
-        });
+        let data =
+            Box::new(SignalHookData { callback: Box::new(callback), weechat_ptr: weechat.ptr });
 
         let data_ref = Box::leak(data);
         let hook_signal = weechat.get().hook_signal.unwrap();
@@ -275,18 +268,12 @@ impl SignalHook {
         };
 
         let hook_data = unsafe { Box::from_raw(data_ref) };
-        let hook = Hook {
-            ptr: hook_ptr,
-            weechat_ptr: weechat.ptr,
-        };
+        let hook = Hook { ptr: hook_ptr, weechat_ptr: weechat.ptr };
 
         if hook_ptr.is_null() {
             Err(())
         } else {
-            Ok(SignalHook {
-                _hook: hook,
-                _hook_data: hook_data,
-            })
+            Ok(SignalHook { _hook: hook, _hook_data: hook_data })
         }
     }
 }
@@ -300,10 +287,10 @@ impl Weechat {
     /// # Arguments
     ///
     /// * `signal_name` - The name of the signal that should be sent out. Common
-    ///     signals can be found in the Weechat plugin API [reference].
+    ///   signals can be found in the Weechat plugin API [reference].
     ///
     /// * `data` - Data that should be provided to the signal callback. This can
-    ///     be a string, an i32 number, or a buffer.
+    ///   be a string, an i32 number, or a buffer.
     ///
     /// ```no_run
     /// # use weechat::Weechat;
@@ -339,14 +326,12 @@ impl Weechat {
             }
         } else {
             let (ptr, data_type) = match data {
-                SignalData::Integer(number) => (
-                    number as *mut _,
-                    weechat_sys::WEECHAT_HOOK_SIGNAL_INT as *const u8,
-                ),
-                SignalData::Buffer(buffer) => (
-                    buffer.ptr() as *mut _,
-                    weechat_sys::WEECHAT_HOOK_SIGNAL_POINTER as *const u8,
-                ),
+                SignalData::Integer(number) => {
+                    (number as *mut _, weechat_sys::WEECHAT_HOOK_SIGNAL_INT as *const u8)
+                }
+                SignalData::Buffer(buffer) => {
+                    (buffer.ptr() as *mut _, weechat_sys::WEECHAT_HOOK_SIGNAL_POINTER as *const u8)
+                }
                 SignalData::String(_) => unreachable!(),
             };
             unsafe { signal_send(signal_name.as_ptr(), data_type as *const c_char, ptr) }

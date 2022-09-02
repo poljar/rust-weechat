@@ -7,20 +7,18 @@ mod window;
 
 use std::{
     borrow::Cow,
+    cell::Cell,
     cmp::{Ord, Ordering},
     ffi::{c_void, CStr},
     marker::PhantomData,
     ptr,
+    rc::Rc,
 };
-
-use std::{cell::Cell, rc::Rc};
 
 #[cfg(feature = "async")]
 use async_trait::async_trait;
 #[cfg(feature = "async")]
 use futures::future::LocalBoxFuture;
-
-use crate::{LossyCString, Weechat};
 use libc::{c_char, c_int};
 use weechat_sys::{
     t_gui_buffer, t_gui_nick, t_hdata, t_weechat_plugin, WEECHAT_RC_ERROR, WEECHAT_RC_OK,
@@ -32,6 +30,7 @@ pub use crate::buffer::{
     nickgroup::NickGroup,
     window::Window,
 };
+use crate::{LossyCString, Weechat};
 
 /// A Weechat buffer.
 ///
@@ -42,9 +41,7 @@ pub struct Buffer<'a> {
 
 impl<'a> std::fmt::Debug for Buffer<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Buffer")
-            .field("full_name", &self.full_name())
-            .finish()
+        f.debug_struct("Buffer").field("full_name", &self.full_name()).finish()
     }
 }
 
@@ -186,8 +183,8 @@ pub trait BufferInputCallback: 'static {
 }
 
 impl<T: FnMut(&Weechat, &Buffer, Cow<str>) -> Result<(), ()> + 'static> BufferInputCallback for T {
-    /// Callback that will be called if the user inputs something into the buffer
-    /// input field.
+    /// Callback that will be called if the user inputs something into the
+    /// buffer input field.
     ///
     /// # Arguments
     ///
@@ -232,8 +229,8 @@ impl<T: FnMut(&Weechat, &Buffer) -> Result<(), ()> + 'static> BufferCloseCallbac
 /// A blanket implementation for pure `FnMut` functions exists, if data needs to
 /// be passed to the callback implement this over your struct.
 pub trait BufferInputCallbackAsync: 'static {
-    /// Callback that will be called if the user inputs something into the buffer
-    /// input field.
+    /// Callback that will be called if the user inputs something into the
+    /// buffer input field.
     ///
     /// # Arguments
     ///
@@ -315,11 +312,7 @@ impl BufferBuilderAsync {
     /// buffer.print("Hello world");
     /// ```
     pub fn new(name: &str) -> Self {
-        BufferBuilderAsync {
-            name: name.to_owned(),
-            input_callback: None,
-            close_callback: None,
-        }
+        BufferBuilderAsync { name: name.to_owned(), input_callback: None, close_callback: None }
     }
 
     /// Set the buffer input callback.
@@ -327,7 +320,7 @@ impl BufferBuilderAsync {
     /// # Arguments
     ///
     /// * `callback` - An async function that will be called once a user inputs
-    ///     data into the buffer input line.
+    ///   data into the buffer input line.
     pub fn input_callback(mut self, callback: impl BufferInputCallbackAsync) -> Self {
         self.input_callback = Some(Box::new(callback));
         self
@@ -338,7 +331,7 @@ impl BufferBuilderAsync {
     /// # Arguments
     ///
     /// * `callback` - The callback that should be called before a buffer is
-    ///     closed.
+    ///   closed.
     pub fn close_callback(mut self, callback: impl BufferCloseCallback + 'static) -> Self {
         self.close_callback = Some(Box::new(callback));
         self
@@ -391,11 +384,7 @@ impl BufferBuilder {
     /// buffer.print("Hello world");
     /// ```
     pub fn new(name: &str) -> Self {
-        BufferBuilder {
-            name: name.to_owned(),
-            input_callback: None,
-            close_callback: None,
-        }
+        BufferBuilder { name: name.to_owned(), input_callback: None, close_callback: None }
     }
 
     /// Set the buffer input callback.
@@ -433,12 +422,11 @@ impl Weechat {
     /// # Arguments
     ///
     /// * `plugin_name` - name of a plugin, the following special value is
-    ///     allowed: "==", the buffer name used is the buffers full name.
+    ///   allowed: "==", the buffer name used is the buffers full name.
     ///
-    /// * `buffer_name` - name of a buffer, if this is an empty string,
-    ///     the current buffer is returned (buffer displayed by current
-    ///     window); if the name starts with (?i), the search is case
-    ///     insensitive.
+    /// * `buffer_name` - name of a buffer, if this is an empty string, the
+    ///   current buffer is returned (buffer displayed by current window); if
+    ///   the name starts with (?i), the search is case insensitive.
     pub fn buffer_search(&self, plugin_name: &str, buffer_name: &str) -> Option<Buffer> {
         let buffer_search = self.get().buffer_search.unwrap();
 
@@ -777,13 +765,7 @@ impl Buffer<'_> {
         let c_message = LossyCString::new(message);
 
         unsafe {
-            printf_date_tags(
-                self.ptr(),
-                0,
-                ptr::null(),
-                fmt_str.as_ptr(),
-                c_message.as_ptr(),
-            )
+            printf_date_tags(self.ptr(), 0, ptr::null(), fmt_str.as_ptr(), c_message.as_ptr())
         }
     }
 
@@ -792,7 +774,7 @@ impl Buffer<'_> {
     /// # Arguments
     ///
     /// * `date` - A unix time-stamp representing the date of the message, 0
-    ///     means now.
+    ///   means now.
     ///
     /// * `tags` - A list of tags that will be applied to the printed line.
     ///
@@ -807,13 +789,7 @@ impl Buffer<'_> {
         let message = LossyCString::new(message);
 
         unsafe {
-            printf_date_tags(
-                self.ptr(),
-                date,
-                tags.as_ptr(),
-                fmt_str.as_ptr(),
-                message.as_ptr(),
-            )
+            printf_date_tags(self.ptr(), date, tags.as_ptr(), fmt_str.as_ptr(), message.as_ptr())
         }
     }
 
@@ -889,7 +865,7 @@ impl Buffer<'_> {
     /// # Arguments
     ///
     /// * `nick_settings` - Nick arguments struct for the nick that should be
-    ///     added.
+    ///   added.
     ///
     /// Returns the newly created nick if one is created successfully, an empty
     /// error otherwise.
@@ -998,8 +974,8 @@ impl Buffer<'_> {
     ///
     /// * `visible` - Should the group be visible in the nicklist.
     ///
-    /// * `parent_group` - Parent group that the group should be added to.
-    ///     If no group is provided the group is added to the root group.
+    /// * `parent_group` - Parent group that the group should be added to. If no
+    ///   group is provided the group is added to the root group.
     ///
     /// Returns the new nicklist group. The group is not removed if the object
     /// is dropped.
@@ -1022,13 +998,7 @@ impl Buffer<'_> {
         };
 
         let group_ptr = unsafe {
-            add_group(
-                self.ptr(),
-                group_ptr,
-                c_name.as_ptr(),
-                c_color.as_ptr(),
-                visible as i32,
-            )
+            add_group(self.ptr(), group_ptr, c_name.as_ptr(), c_color.as_ptr(), visible as i32)
         };
 
         if group_ptr.is_null() {
@@ -1083,7 +1053,7 @@ impl Buffer<'_> {
     /// # Arguments
     ///
     /// * `property` - The name of the property for which the value should be
-    ///     fetched.
+    ///   fetched.
     pub fn get_localvar(&self, property: &str) -> Option<Cow<str>> {
         self.get_string(&format!("localvar_{}", property))
     }
@@ -1418,11 +1388,7 @@ impl Buffer<'_> {
         if ptr.is_null() {
             None
         } else {
-            Some(Window {
-                weechat: weechat.ptr,
-                ptr,
-                phantom: PhantomData,
-            })
+            Some(Window { weechat: weechat.ptr, ptr, phantom: PhantomData })
         }
     }
 

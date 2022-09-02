@@ -16,15 +16,14 @@ mod timer;
 pub use bar::{BarItem, BarItemCallback};
 pub use commands::{Command, CommandCallback, CommandRun, CommandRunCallback, CommandSettings};
 pub use completion::{Completion, CompletionCallback, CompletionHook, CompletionPosition};
-
 pub use fd::{FdHook, FdHookCallback, FdHookMode};
 #[cfg(feature = "unsound")]
 pub use modifier::{ModifierCallback, ModifierData, ModifierHook};
 pub use signal::{SignalCallback, SignalData, SignalHook};
 pub use timer::{RemainingCalls, TimerCallback, TimerHook};
+use weechat_sys::{t_hook, t_weechat_plugin};
 
 use crate::Weechat;
-use weechat_sys::{t_hook, t_weechat_plugin};
 
 /// Weechat Hook type. The hook is unhooked automatically when the object is
 /// dropped.

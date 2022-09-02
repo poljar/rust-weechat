@@ -1,6 +1,6 @@
-use libc::{c_char, c_int};
 use std::{borrow::Cow, ffi::CStr, os::raw::c_void, ptr};
 
+use libc::{c_char, c_int};
 use weechat_sys::{
     t_gui_buffer, t_gui_completion, t_weechat_plugin, WEECHAT_RC_ERROR, WEECHAT_RC_OK,
 };
@@ -79,10 +79,7 @@ impl Completion {
         weechat: *mut t_weechat_plugin,
         completion: *mut t_gui_completion,
     ) -> Completion {
-        Completion {
-            weechat_ptr: weechat,
-            ptr: completion,
-        }
+        Completion { weechat_ptr: weechat, ptr: completion }
     }
 
     /// Add a word for completion, keeping the list sorted.
@@ -164,13 +161,13 @@ impl CompletionHook {
     ///
     /// # Arguments
     ///
-    /// * `name` - The name of the new completion. After this is created the
-    ///     can be used as `%(name)` when creating commands.
+    /// * `name` - The name of the new completion. After this is created the can
+    ///   be used as `%(name)` when creating commands.
     ///
     /// * `description` - The description of the new completion.
     ///
     /// * `callback` - A function that will be called when the completion is
-    ///     used, the callback must populate the candidates for the completion.
+    ///   used, the callback must populate the candidates for the completion.
     ///
     /// # Example
     /// ```no_run
@@ -200,7 +197,6 @@ impl CompletionHook {
     ///     "Completion for the list of added Matrix servers",
     ///     servers,
     /// ).unwrap();
-    ///
     /// ```
     pub fn new(
         completion_item: &str,
@@ -238,10 +234,8 @@ impl CompletionHook {
         Weechat::check_thread();
         let weechat = unsafe { Weechat::weechat() };
 
-        let data = Box::new(CompletionHookData {
-            callback: Box::new(callback),
-            weechat_ptr: weechat.ptr,
-        });
+        let data =
+            Box::new(CompletionHookData { callback: Box::new(callback), weechat_ptr: weechat.ptr });
 
         let data_ref = Box::leak(data);
         let hook_completion = weechat.get().hook_completion.unwrap();
@@ -266,14 +260,8 @@ impl CompletionHook {
             return Err(());
         }
 
-        let hook = Hook {
-            ptr: hook_ptr,
-            weechat_ptr: weechat.ptr,
-        };
+        let hook = Hook { ptr: hook_ptr, weechat_ptr: weechat.ptr };
 
-        Ok(CompletionHook {
-            _hook: hook,
-            _hook_data: hook_data,
-        })
+        Ok(CompletionHook { _hook: hook, _hook_data: hook_data })
     }
 }

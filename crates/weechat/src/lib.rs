@@ -61,11 +61,11 @@ pub mod config;
 pub mod hooks;
 pub mod infolist;
 
-pub use crate::weechat::{Args, Prefix, Weechat};
-
 pub use libc;
 pub use weechat_macro::plugin;
 pub use weechat_sys;
+
+pub use crate::weechat::{Args, Prefix, Weechat};
 
 /// Weechat plugin trait.
 ///
@@ -81,7 +81,7 @@ pub trait Plugin: Sized {
     /// # Arguments
     ///
     /// * `weechat` - A borrow to a Weechat object that will be valid during the
-    ///     duration of the init callback.
+    ///   duration of the init callback.
     ///
     /// * `args` - Arguments passed to the plugin when it is loaded.
     fn init(weechat: &Weechat, args: Args) -> Result<Self, ()>;

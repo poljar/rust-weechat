@@ -1,9 +1,9 @@
-use libc::c_int;
 use std::{
     os::{raw::c_void, unix::io::AsRawFd},
     ptr,
 };
 
+use libc::c_int;
 use weechat_sys::{t_weechat_plugin, WEECHAT_RC_OK};
 
 use super::Hook;
@@ -54,7 +54,7 @@ pub trait FdHookCallback {
     /// * `weechat` - A Weechat context.
     ///
     /// * `fd_object` - The file-descriptor based object that was registered to
-    ///     be watched for reads or writes.
+    ///   be watched for reads or writes.
     fn callback(&mut self, weechat: &Weechat, fd_object: &mut Self::FdObject);
 }
 
@@ -71,18 +71,17 @@ impl<F> FdHook<F> {
     /// # Arguments
     ///
     /// * `fd_object` - An object for wich the file descriptor will be watched
-    ///     and the callback called when read or write operations can happen
-    ///     on it.
+    ///   and the callback called when read or write operations can happen on
+    ///   it.
     ///
     /// * `mode` - Configure the hook to watch for writes, reads or both on the
-    ///     file descriptor.
+    ///   file descriptor.
     ///
     /// * `callback` - A function that will be called if a watched event on the
-    ///     file descriptor happends.
+    ///   file descriptor happends.
     ///
     /// * `callback_data` - Data that will be passed to the callback every time
-    ///     the callback runs. This data will be freed when the hook is
-    ///     unhooked.
+    ///   the callback runs. This data will be freed when the hook is unhooked.
     ///
     /// # Panics
     ///
@@ -91,7 +90,7 @@ impl<F> FdHook<F> {
     /// # Example
     ///
     /// ```no_run
-    ///
+    /// 
     /// # use weechat::{Weechat, hooks::{FdHook, FdHookMode, FdHookCallback}};
     /// # use pipe_channel::{channel, Receiver, Sender};
     ///
@@ -111,7 +110,6 @@ impl<F> FdHook<F> {
     ///
     /// let hook = FdHook::new(receiver, FdHookMode::Read, Data)
     ///     .expect("Can't create executor FD hook");
-    ///
     /// ```
     pub fn new(
         fd_object: F,
@@ -165,18 +163,12 @@ impl<F> FdHook<F> {
         };
 
         let hook_data = unsafe { Box::from_raw(data_ref) };
-        let hook = Hook {
-            ptr: hook_ptr,
-            weechat_ptr: weechat.ptr,
-        };
+        let hook = Hook { ptr: hook_ptr, weechat_ptr: weechat.ptr };
 
         if hook_ptr.is_null() {
             Err(())
         } else {
-            Ok(FdHook::<F> {
-                _hook: hook,
-                _hook_data: hook_data,
-            })
+            Ok(FdHook::<F> { _hook: hook, _hook_data: hook_data })
         }
     }
 }

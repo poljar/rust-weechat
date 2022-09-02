@@ -4,6 +4,7 @@ use std::{
     ffi::{c_void, CStr},
     os::raw::c_char,
 };
+
 use weechat_sys::t_hdata;
 
 use crate::{LossyCString, Weechat};

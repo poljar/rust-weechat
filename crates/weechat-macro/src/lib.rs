@@ -1,17 +1,16 @@
 #![recursion_limit = "256"]
 
 extern crate proc_macro;
-use proc_macro2::{Ident, Literal};
 use std::collections::HashMap;
 
+use proc_macro2::{Ident, Literal};
+use quote::quote;
 use syn::{
     parse::{Parse, ParseStream, Result},
     parse_macro_input,
     punctuated::Punctuated,
     Error, LitStr,
 };
-
-use quote::quote;
 
 struct WeechatPluginInfo {
     plugin: syn::Ident,
@@ -79,10 +78,7 @@ impl Parse for WeechatVariable {
 impl Parse for WeechatPluginInfo {
     fn parse(input: ParseStream) -> Result<Self> {
         let plugin: syn::Ident = input.parse().map_err(|_e| {
-            Error::new(
-                input.span(),
-                "a struct that implements the Plugin trait needs to be given",
-            )
+            Error::new(input.span(), "a struct that implements the Plugin trait needs to be given")
         })?;
         input.parse::<syn::Token![,]>()?;
 
@@ -104,12 +100,7 @@ impl Parse for WeechatPluginInfo {
         Ok(WeechatPluginInfo {
             plugin,
             name: variables.remove("name").map_or_else(
-                || {
-                    Err(Error::new(
-                        input.span(),
-                        "the name of the plugin needs to be defined",
-                    ))
-                },
+                || Err(Error::new(input.span(), "the name of the plugin needs to be defined")),
                 |v| Ok(v.as_pair()),
             )?,
             author: variables
@@ -153,14 +144,8 @@ impl Parse for WeechatPluginInfo {
 /// ```
 #[proc_macro]
 pub fn plugin(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let WeechatPluginInfo {
-        plugin,
-        name,
-        author,
-        description,
-        version,
-        license,
-    } = parse_macro_input!(input as WeechatPluginInfo);
+    let WeechatPluginInfo { plugin, name, author, description, version, license } =
+        parse_macro_input!(input as WeechatPluginInfo);
 
     let (name_len, name) = name;
     let (author_len, author) = author;
