@@ -39,6 +39,7 @@ paste = { version = "1.0.9", optional = true }
 strum = { version = "0.24.1", optional = true }
 
 weechat-macro = { version = "0.4.0", path = "../weechat-macro" }
+weechat-test = { path = "../weechat-test" }
 weechat-sys = { version = "0.4.0", path = "../weechat-sys" }
 
 [dev-dependencies]

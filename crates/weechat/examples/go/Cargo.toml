@@ -14,3 +14,5 @@ fuzzy-matcher = "0.3.7"
 [dependencies.weechat]
 path = "../../"
 features = ["config_macro", "unsound"]
+
+[workspace]

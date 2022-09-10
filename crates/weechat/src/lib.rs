@@ -4,7 +4,10 @@
 //!
 //! The bindings make it possible to create powerful Weechat plugins using Rust.
 //!
-//! ```no_run
+//! # This is currently disabled because proc-macro-crate can't determine if it's run inside a
+//! # doctest, this cargo issue is relevant:
+//! # https://github.com/rust-lang/cargo/issues/9886
+//! ```no_compile
 //! use weechat::{
 //!    buffer::Buffer,
 //!    plugin, Args, Weechat, Plugin,
@@ -64,6 +67,7 @@ pub mod infolist;
 pub use libc;
 pub use weechat_macro::plugin;
 pub use weechat_sys;
+pub use weechat_test::weechat_test;
 
 pub use crate::weechat::{Args, Prefix, Weechat};
 

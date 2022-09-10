@@ -1,0 +1,22 @@
+[package]
+name = "weechat-test"
+version = "0.1.0"
+authors = ["Damir Jelić <poljar@termina.org.uk>"]
+description = "Procedural macros to test weechat plugins"
+edition = "2021"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/poljar/rust-weechat"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+libc = "0.2.132"
+syn = { version = "1.0.99", features = ["full"] }
+proc-macro2 = "1.0.43"
+quote = "1.0.21"
+weechat-macro = {version = "0.4.0", path = "../weechat-macro" }
+
+[dev-dependencies]
+weechat = { path = "../weechat" }

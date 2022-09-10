@@ -698,3 +698,15 @@ impl Weechat {
         WeechatExecutor::spawn_buffer_cb(buffer_name, future)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use weechat_test::weechat_test;
+
+    use crate::{Args, Weechat};
+
+    #[weechat_test]
+    fn get_home_dir() {
+        todo!()
+    }
+}

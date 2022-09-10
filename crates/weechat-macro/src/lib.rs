@@ -3,7 +3,8 @@
 extern crate proc_macro;
 use std::collections::HashMap;
 
-use proc_macro2::{Ident, Literal};
+use proc_macro2::{Ident, Literal, Span};
+use proc_macro_crate::{crate_name, FoundCrate};
 use quote::quote;
 use syn::{
     parse::{Parse, ParseStream, Result},
@@ -147,6 +148,16 @@ pub fn plugin(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let WeechatPluginInfo { plugin, name, author, description, version, license } =
         parse_macro_input!(input as WeechatPluginInfo);
 
+    let weechat = crate_name("weechat").expect("This plugin works only with the weechat crate");
+
+    let weechat = match weechat {
+        FoundCrate::Itself => quote!(crate),
+        FoundCrate::Name(name) => {
+            let ident = Ident::new(&name, Span::call_site());
+            quote!( #ident )
+        }
+    };
+
     let (name_len, name) = name;
     let (author_len, author) = author;
     let (description_len, description) = description;
@@ -156,8 +167,8 @@ pub fn plugin(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let result = quote! {
         #[doc(hidden)]
         #[no_mangle]
-        pub static weechat_plugin_api_version: [u8; weechat::weechat_sys::WEECHAT_PLUGIN_API_VERSION_LENGTH] =
-            *weechat::weechat_sys::WEECHAT_PLUGIN_API_VERSION;
+        pub static weechat_plugin_api_version: [u8; #weechat::weechat_sys::WEECHAT_PLUGIN_API_VERSION_LENGTH] =
+            *#weechat::weechat_sys::WEECHAT_PLUGIN_API_VERSION;
 
         #[doc(hidden)]
         #[no_mangle]
@@ -190,23 +201,23 @@ pub fn plugin(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         #[doc(hidden)]
         #[no_mangle]
         pub unsafe extern "C" fn weechat_plugin_init(
-            plugin: *mut weechat::weechat_sys::t_weechat_plugin,
-            argc: weechat::libc::c_int,
-            argv: *mut *mut weechat::libc::c_char,
-        ) -> weechat::libc::c_int {
+            plugin: *mut #weechat::weechat_sys::t_weechat_plugin,
+            argc: #weechat::libc::c_int,
+            argv: *mut *mut #weechat::libc::c_char,
+        ) -> #weechat::libc::c_int {
             let weechat = unsafe {
-                Weechat::init_from_ptr(plugin)
+                #weechat::Weechat::init_from_ptr(plugin)
             };
-            let args = Args::new(argc, argv);
-            match <#plugin as ::weechat::Plugin>::init(&weechat, args) {
+            let args = #weechat::Args::new(argc, argv);
+            match <#plugin as #weechat::Plugin>::init(&weechat, args) {
                 Ok(p) => {
                     unsafe {
                         __PLUGIN = Some(p);
                     }
-                    return weechat::weechat_sys::WEECHAT_RC_OK;
+                    return #weechat::weechat_sys::WEECHAT_RC_OK;
                 }
                 Err(_e) => {
-                    return weechat::weechat_sys::WEECHAT_RC_ERROR;
+                    return #weechat::weechat_sys::WEECHAT_RC_ERROR;
                 }
             }
         }
@@ -219,13 +230,13 @@ pub fn plugin(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         #[doc(hidden)]
         #[no_mangle]
         pub unsafe extern "C" fn weechat_plugin_end(
-            _plugin: *mut weechat::weechat_sys::t_weechat_plugin
-        ) -> weechat::libc::c_int {
+            _plugin: *mut #weechat::weechat_sys::t_weechat_plugin
+        ) -> #weechat::libc::c_int {
             unsafe {
                 __PLUGIN = None;
-                Weechat::free();
+                #weechat::Weechat::free();
             }
-            weechat::weechat_sys::WEECHAT_RC_OK
+            #weechat::weechat_sys::WEECHAT_RC_OK
         }
 
         impl #plugin {
