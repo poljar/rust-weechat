@@ -50,7 +50,7 @@ pub struct CommandSettings {
     /// Arguments for the command (displayed with `/help command`)
     arguments: Vec<String>,
     /// Description for the command arguments (displayed with `/help command`)
-    argument_descriptoin: String,
+    argument_description: String,
     /// Completion template for the command.
     completion: Vec<String>,
 }
@@ -72,8 +72,8 @@ impl CommandSettings {
     /// # Arguments
     ///
     /// * `description` - The description of the command.
-    pub fn description<D: Into<String>>(mut self, descritpion: D) -> Self {
-        self.description = descritpion.into();
+    pub fn description<D: Into<String>>(mut self, description: D) -> Self {
+        self.description = description.into();
         self
     }
 
@@ -96,8 +96,8 @@ impl CommandSettings {
     ///
     /// * `description` - The argument description that should be set for the
     ///   command.
-    pub fn arguments_description<T: Into<String>>(mut self, descritpion: T) -> Self {
-        self.argument_descriptoin = descritpion.into();
+    pub fn arguments_description<T: Into<String>>(mut self, description: T) -> Self {
+        self.argument_description = description.into();
         self
     }
 
@@ -307,7 +307,7 @@ impl Command {
         let name = LossyCString::new(command_settings.name);
         let description = LossyCString::new(command_settings.description);
         let args = LossyCString::new(command_settings.arguments.join("||"));
-        let args_description = LossyCString::new(command_settings.argument_descriptoin);
+        let args_description = LossyCString::new(command_settings.argument_description);
         let completion = LossyCString::new(command_settings.completion.join("||"));
 
         let data =

@@ -282,7 +282,7 @@ impl Weechat {
     /// Send a signal.
     ///
     /// This will send out a signal and callbacks that are registered with a
-    /// `SignalHook` to listen to that signal wil get called.
+    /// `SignalHook` to listen to that signal will get called.
     ///
     /// # Arguments
     ///

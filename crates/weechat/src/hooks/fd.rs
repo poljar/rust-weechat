@@ -70,7 +70,7 @@ impl<F> FdHook<F> {
     ///
     /// # Arguments
     ///
-    /// * `fd_object` - An object for wich the file descriptor will be watched
+    /// * `fd_object` - An object for which the file descriptor will be watched
     ///   and the callback called when read or write operations can happen on
     ///   it.
     ///
@@ -78,7 +78,7 @@ impl<F> FdHook<F> {
     ///   file descriptor.
     ///
     /// * `callback` - A function that will be called if a watched event on the
-    ///   file descriptor happends.
+    ///   file descriptor happens.
     ///
     /// * `callback_data` - Data that will be passed to the callback every time
     ///   the callback runs. This data will be freed when the hook is unhooked.

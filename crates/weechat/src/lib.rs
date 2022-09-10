@@ -76,7 +76,7 @@ pub use crate::weechat::{Args, Prefix, Weechat};
 pub trait Plugin: Sized {
     /// The initialization method for the plugin.
     ///
-    /// This will be called when Weechat loads the pluign.
+    /// This will be called when Weechat loads the plugin.
     ///
     /// # Arguments
     ///

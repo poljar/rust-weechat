@@ -190,7 +190,7 @@ impl<T: FnMut(&Weechat, &Buffer, Cow<str>) -> Result<(), ()> + 'static> BufferIn
     ///
     /// * `weechat` - A Weechat context.
     ///
-    /// * `buffer` - The buffer that the user inputed some text into.
+    /// * `buffer` - The buffer that the user inputted some text into.
     ///
     /// * `input` - The input that was posted by the user.
     fn callback(&mut self, weechat: &Weechat, buffer: &Buffer, input: Cow<str>) -> Result<(), ()> {
@@ -236,7 +236,7 @@ pub trait BufferInputCallbackAsync: 'static {
     ///
     /// * `weechat` - A Weechat context.
     ///
-    /// * `buffer` - The buffer that the user inputed some text into.
+    /// * `buffer` - The buffer that the user inputted some text into.
     ///
     /// * `input` - The input that was posted by the user.
     async fn callback(&mut self, buffer: BufferHandle, input: String);

@@ -4,7 +4,7 @@ use weechat_sys::{t_config_option, t_weechat_plugin};
 
 use crate::{
     config::{
-        config_options::{FromPtrs, HidenConfigOptionT},
+        config_options::{FromPtrs, HiddenConfigOptionT},
         BaseConfigOption, ConfigOptions, ConfigSection,
     },
     Weechat,
@@ -37,8 +37,8 @@ impl BooleanOptionSettings {
     /// # Arguments
     ///
     /// * `description` - The description of the new option.
-    pub fn description<D: Into<String>>(mut self, descritpion: D) -> Self {
-        self.description = descritpion.into();
+    pub fn description<D: Into<String>>(mut self, description: D) -> Self {
+        self.description = description.into();
         self
     }
 
@@ -103,7 +103,7 @@ impl<'a> FromPtrs for BooleanOption<'a> {
     }
 }
 
-impl<'a> HidenConfigOptionT for BooleanOption<'a> {
+impl<'a> HiddenConfigOptionT for BooleanOption<'a> {
     fn get_ptr(&self) -> *mut t_config_option {
         self.ptr
     }

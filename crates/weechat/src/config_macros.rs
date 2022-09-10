@@ -51,7 +51,7 @@ macro_rules! option_getter {
                 {
                     $output_type::from(o.value())
                 } else {
-                    panic!("Incorect option type for option {} in section {}",
+                    panic!("Incorrect option type for option {} in section {}",
                            $string_name, self.0.name());
                 }
             }
@@ -73,7 +73,7 @@ macro_rules! option_getter {
                             self.0.name())
                         )
                 } else {
-                    panic!("Incorect option type for option {} in section {}",
+                    panic!("Incorrect option type for option {} in section {}",
                            $string_name, self.0.name());
                 }
             }

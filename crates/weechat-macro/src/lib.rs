@@ -121,7 +121,7 @@ impl Parse for WeechatPluginInfo {
 
 /// Register a struct that implements the `Plugin` trait as a Weechat plugin.
 ///
-/// This configures the Weechat init and end method as well as additonal plugin
+/// This configures the Weechat init and end method as well as additional plugin
 /// metadata.
 ///
 /// # Example

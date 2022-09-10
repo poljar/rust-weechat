@@ -120,7 +120,7 @@ impl Completion {
         }
     }
 
-    /// Add a word to the completion giving the position and wether the word is
+    /// Add a word to the completion giving the position and whether the word is
     /// a nick.
     ///
     /// # Arguments

@@ -50,7 +50,7 @@ pub trait FromPtrs {
     fn from_ptrs(option_ptr: *mut t_config_option, weechat_ptr: *mut t_weechat_plugin) -> Self;
 }
 
-pub trait HidenConfigOptionT {
+pub trait HiddenConfigOptionT {
     /// Returns the raw pointer to the config option.
     fn get_ptr(&self) -> *mut t_config_option;
     fn get_weechat(&self) -> Weechat;
@@ -75,7 +75,7 @@ pub trait HidenConfigOptionT {
 ///
 /// These methods are implemented for every option and don't depend on the
 /// option type.
-pub trait BaseConfigOption: HidenConfigOptionT {
+pub trait BaseConfigOption: HiddenConfigOptionT {
     /// Get the name of the option.
     fn name(&self) -> Cow<str> {
         self.get_string("name").expect("Can't get the name of the option")
