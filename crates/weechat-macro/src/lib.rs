@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use proc_macro2::{Ident, Literal, Span};
 use proc_macro_crate::{crate_name, FoundCrate};
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::{
     parse::{Parse, ParseStream, Result},
     parse_macro_input,
@@ -15,7 +15,7 @@ use syn::{
 
 struct WeechatPluginInfo {
     plugin: syn::Ident,
-    name: (usize, Literal),
+    name: (usize, Literal, String),
     author: (usize, Literal),
     description: (usize, Literal),
     version: (usize, Literal),
@@ -32,8 +32,8 @@ enum WeechatVariable {
 
 impl WeechatVariable {
     #[allow(clippy::wrong_self_convention)]
-    fn to_pair(string: &LitStr) -> (usize, Literal) {
-        let mut bytes = string.value().into_bytes();
+    fn to_pair(string: String) -> (usize, Literal) {
+        let mut bytes = string.into_bytes();
         // Push a null byte since this goes to the C side.
         bytes.push(0);
 
@@ -41,18 +41,22 @@ impl WeechatVariable {
     }
 
     fn as_pair(&self) -> (usize, Literal) {
-        match self {
-            WeechatVariable::Name(string) => WeechatVariable::to_pair(string),
-            WeechatVariable::Author(string) => WeechatVariable::to_pair(string),
-            WeechatVariable::Description(string) => WeechatVariable::to_pair(string),
-            WeechatVariable::Version(string) => WeechatVariable::to_pair(string),
-            WeechatVariable::License(string) => WeechatVariable::to_pair(string),
-        }
+        Self::to_pair(self.value())
     }
 
     fn default_literal() -> (usize, Literal) {
         let bytes = vec![0];
         (bytes.len(), Literal::byte_string(&bytes))
+    }
+
+    fn value(&self) -> String {
+        match self {
+            WeechatVariable::Name(v) => v.value(),
+            WeechatVariable::Author(v) => v.value(),
+            WeechatVariable::Description(v) => v.value(),
+            WeechatVariable::Version(v) => v.value(),
+            WeechatVariable::License(v) => v.value(),
+        }
     }
 }
 
@@ -100,10 +104,16 @@ impl Parse for WeechatPluginInfo {
 
         Ok(WeechatPluginInfo {
             plugin,
-            name: variables.remove("name").map_or_else(
-                || Err(Error::new(input.span(), "the name of the plugin needs to be defined")),
-                |v| Ok(v.as_pair()),
-            )?,
+            name: variables
+                .remove("name")
+                .map_or_else(
+                    || Err(Error::new(input.span(), "the name of the plugin needs to be defined")),
+                    |v| {
+                        let (length, byte_name) = v.as_pair();
+                        Ok((length, byte_name, v.value()))
+                    },
+                )
+                .unwrap(),
             author: variables
                 .remove("author")
                 .map_or_else(WeechatVariable::default_literal, |v| v.as_pair()),
@@ -158,11 +168,13 @@ pub fn plugin(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
         }
     };
 
-    let (name_len, name) = name;
+    let (name_len, name, name_string) = name;
     let (author_len, author) = author;
     let (description_len, description) = description;
     let (license_len, license) = license;
     let (version_len, version) = version;
+
+    let name_method = Ident::new(&format!("weechat_plugin_name_{name_string}"), Span::call_site());
 
     let result = quote! {
         #[doc(hidden)]
@@ -172,7 +184,7 @@ pub fn plugin(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
         #[doc(hidden)]
         #[no_mangle]
-        pub static weechat_plugin_name: [u8; #name_len] = *#name;
+        pub static #name_method: [u8; #name_len] = *#name;
 
         #[doc(hidden)]
         #[no_mangle]
