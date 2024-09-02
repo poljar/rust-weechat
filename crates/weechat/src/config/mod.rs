@@ -28,6 +28,7 @@ mod color;
 #[allow(clippy::module_inception)]
 mod config;
 mod config_options;
+mod r#enum;
 mod integer;
 mod section;
 mod string;
@@ -38,6 +39,7 @@ pub use crate::config::{
     config::{Conf, Config, ConfigReloadCallback, OptionChanged},
     config_options::{BaseConfigOption, ConfigOptions, OptionType},
     integer::{IntegerOption, IntegerOptionSettings},
+    r#enum::{EnumOption, EnumOptionSettings},
     section::{
         ConfigOption, ConfigSection, ConfigSectionSettings, SectionHandle, SectionHandleMut,
         SectionReadCallback, SectionWriteCallback, SectionWriteDefaultCallback,
