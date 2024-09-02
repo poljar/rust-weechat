@@ -4,13 +4,15 @@ use weechat_sys::{t_config_option, t_weechat_plugin};
 
 use crate::{config::OptionChanged, LossyCString, Weechat};
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Default)]
 #[allow(missing_docs)]
 pub enum OptionType {
     Boolean,
     Integer,
+    #[default]
     String,
     Color,
+    Enum,
 }
 
 impl TryFrom<&str> for OptionType {
@@ -21,6 +23,7 @@ impl TryFrom<&str> for OptionType {
             "integer" => OptionType::Integer,
             "string" => OptionType::String,
             "color" => OptionType::Color,
+            "enum" => OptionType::Enum,
             _ => return Err("Invalid option type"),
         };
 
@@ -35,13 +38,8 @@ impl OptionType {
             OptionType::Integer => "integer",
             OptionType::String => "string",
             OptionType::Color => "color",
+            OptionType::Enum => "enum",
         }
-    }
-}
-
-impl Default for OptionType {
-    fn default() -> Self {
-        OptionType::String
     }
 }
 

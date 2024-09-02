@@ -15,8 +15,8 @@ use crate::{
     config::{
         config_options::{CheckCB, OptionPointers, OptionType},
         BaseConfigOption, BooleanOption, BooleanOptionSettings, ColorOption, ColorOptionSettings,
-        Conf, Config, ConfigOptions, IntegerOption, IntegerOptionSettings, OptionChanged,
-        StringOption, StringOptionSettings,
+        Conf, Config, ConfigOptions, EnumOption, EnumOptionSettings, IntegerOption,
+        IntegerOptionSettings, OptionChanged, StringOption, StringOptionSettings,
     },
     LossyCString, Weechat,
 };
@@ -40,6 +40,7 @@ pub enum ConfigOption<'a> {
     Integer(IntegerOption<'a>),
     String(StringOption<'a>),
     Color(ColorOption<'a>),
+    Enum(EnumOption<'a>),
 }
 
 impl<'a> ConfigOption<'a> {
@@ -49,6 +50,7 @@ impl<'a> ConfigOption<'a> {
             ConfigOption::Boolean(ref o) => o,
             ConfigOption::Integer(ref o) => o,
             ConfigOption::String(ref o) => o,
+            ConfigOption::Enum(ref o) => o,
         }
     }
 }
@@ -90,6 +92,12 @@ impl<'a> AsRef<dyn BaseConfigOption + 'a> for StringOption<'a> {
     }
 }
 
+impl<'a> AsRef<dyn BaseConfigOption + 'a> for EnumOption<'a> {
+    fn as_ref(&self) -> &(dyn BaseConfigOption + 'a) {
+        self
+    }
+}
+
 impl<'a> AsRef<dyn BaseConfigOption + 'a> for ConfigOption<'a> {
     fn as_ref(&self) -> &(dyn BaseConfigOption + 'a) {
         self.as_base_config_option()
@@ -102,6 +110,7 @@ pub(crate) enum ConfigOptionPointers {
     Integer(*const c_void),
     String(*const c_void),
     Color(*const c_void),
+    Enum(*const c_void),
 }
 
 /// A mutable handle to a Weechat config section.
@@ -375,6 +384,9 @@ impl Drop for ConfigSection {
                     ConfigOptionPointers::Color(p) => {
                         Box::from_raw(p as *mut OptionPointers<ColorOption>);
                     }
+                    ConfigOptionPointers::Enum(p) => {
+                        Box::from_raw(p as *mut OptionPointers<EnumOption>);
+                    }
                 }
             }
         }
@@ -573,7 +585,6 @@ impl ConfigSection {
                 name: &settings.name,
                 option_type: OptionType::Integer,
                 description: &settings.description,
-                string_values: &settings.string_values,
                 min: settings.min,
                 max: settings.max,
                 default_value: &settings.default_value.to_string(),
@@ -630,6 +641,42 @@ impl ConfigSection {
         self.option_pointers.insert(settings.name, option_ptrs);
 
         let option = ColorOption { ptr, weechat_ptr: self.weechat_ptr, _phantom: PhantomData };
+        Ok(option)
+    }
+
+    /// Create a new enum Weechat configuration option.
+    ///
+    /// Returns None if the option couldn't be created, e.g. if a option with
+    /// the same name already exists.
+    ///
+    /// # Arguments
+    /// * `settings` - Settings that decide how the option should be created.
+    pub fn new_enum_option(&mut self, settings: EnumOptionSettings) -> Result<EnumOption, ()> {
+        let ret = self.new_option(
+            OptionDescription {
+                name: &settings.name,
+                description: &settings.description,
+                option_type: OptionType::Enum,
+                string_values: &settings.string_values,
+                default_value: &settings.default_value.to_string(),
+                value: &settings.default_value.to_string(),
+                ..Default::default()
+            },
+            None,
+            settings.change_cb,
+            None,
+        );
+
+        let (ptr, option_pointers) = if let Some((ptr, ptrs)) = ret {
+            (ptr, ptrs)
+        } else {
+            return Err(());
+        };
+
+        let option_ptrs = ConfigOptionPointers::Enum(option_pointers);
+        self.option_pointers.insert(settings.name, option_ptrs);
+
+        let option = EnumOption { ptr, weechat_ptr: self.weechat_ptr, _phantom: PhantomData };
         Ok(option)
     }
 

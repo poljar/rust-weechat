@@ -10,9 +10,9 @@ use crate::{
     Weechat,
 };
 
-/// Settings for a new integer option.
+/// Settings for a new enum option.
 #[derive(Default)]
-pub struct IntegerOptionSettings {
+pub struct EnumOptionSettings {
     pub(crate) name: String,
 
     pub(crate) description: String,
@@ -23,17 +23,21 @@ pub struct IntegerOptionSettings {
 
     pub(crate) max: i32,
 
-    pub(crate) change_cb: Option<Box<dyn FnMut(&Weechat, &IntegerOption)>>,
+    pub(crate) string_values: String,
+
+    pub(crate) change_cb: Option<Box<dyn FnMut(&Weechat, &EnumOption)>>,
 }
 
-impl IntegerOptionSettings {
-    /// Create new settings that can be used to create a new integer option.
+impl EnumOptionSettings {
+    /// Create new settings that can be used to create a new enum option.
+    ///
+    /// An enum option is represented as integer (index of enum value) internally
     ///
     /// # Arguments
     ///
     /// * `name` - The name of the new option.
     pub fn new<N: Into<String>>(name: N) -> Self {
-        IntegerOptionSettings { name: name.into(), ..Default::default() }
+        EnumOptionSettings { name: name.into(), ..Default::default() }
     }
 
     /// Set the description of the option.
@@ -59,7 +63,7 @@ impl IntegerOptionSettings {
         self
     }
 
-    /// Set minimal value of the integer option.
+    /// Set minimal value of the enum option.
     ///
     /// # Arguments
     ///
@@ -69,13 +73,36 @@ impl IntegerOptionSettings {
         self
     }
 
-    /// Set maximum value of the integer option.
+    /// Set maximum value of the enum option.
     ///
     /// # Arguments
     ///
     /// * `value` - The values that should act as maximal valid value.
     pub fn max(mut self, value: i32) -> Self {
         self.max = value;
+        self
+    }
+
+    /// Set the string values of the option.
+    ///
+    /// # Arguments
+    ///
+    /// * `values` - The values that should act as the symbolic values.
+    ///
+    /// # Examples
+    /// ```no_run
+    /// use weechat::config::EnumOptionSettings;
+    ///
+    /// let settings = EnumOptionSettings::new("server_buffer")
+    ///     .string_values(vec!["independent", "merged"]);
+    /// ```
+    pub fn string_values<I, T>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<String>,
+    {
+        let vec: Vec<String> = values.into_iter().map(Into::into).collect();
+        self.string_values = vec.join("|");
         self
     }
 
@@ -86,49 +113,47 @@ impl IntegerOptionSettings {
     /// * `callback` - The callback that will be run.
     ///
     /// # Examples
-    ///
     /// ```
     /// use weechat::Weechat;
-    /// use weechat::config::IntegerOptionSettings;
+    /// use weechat::config::EnumOptionSettings;
     ///
-    /// let settings = IntegerOptionSettings::new("server_buffer")
-    ///     .string_values(vec!["independent", "merged"])
+    /// let settings = EnumOptionSettings::new("address")
     ///     .set_change_callback(|weechat, option| {
     ///         Weechat::print("Option changed");
     ///     });
     /// ```
     pub fn set_change_callback(
         mut self,
-        callback: impl FnMut(&Weechat, &IntegerOption) + 'static,
+        callback: impl FnMut(&Weechat, &EnumOption) + 'static,
     ) -> Self {
         self.change_cb = Some(Box::new(callback));
         self
     }
 }
 
-/// A config option with a integer value.
-pub struct IntegerOption<'a> {
+/// A config option with a enum value.
+pub struct EnumOption<'a> {
     pub(crate) ptr: *mut t_config_option,
     pub(crate) weechat_ptr: *mut t_weechat_plugin,
     pub(crate) _phantom: PhantomData<&'a ConfigSection>,
 }
 
-impl<'a> IntegerOption<'a> {
+impl<'a> EnumOption<'a> {
     /// Get the value of the option.
     pub fn value(&self) -> i32 {
         let weechat = self.get_weechat();
-        let config_integer = weechat.get().config_integer.unwrap();
-        unsafe { config_integer(self.get_ptr()) }
+        let config_enum = weechat.get().config_enum.unwrap();
+        unsafe { config_enum(self.get_ptr()) }
     }
 }
 
-impl<'a> FromPtrs for IntegerOption<'a> {
+impl<'a> FromPtrs for EnumOption<'a> {
     fn from_ptrs(option_ptr: *mut t_config_option, weechat_ptr: *mut t_weechat_plugin) -> Self {
-        IntegerOption { ptr: option_ptr, weechat_ptr, _phantom: PhantomData }
+        EnumOption { ptr: option_ptr, weechat_ptr, _phantom: PhantomData }
     }
 }
 
-impl<'a> HiddenConfigOptionT for IntegerOption<'a> {
+impl<'a> HiddenConfigOptionT for EnumOption<'a> {
     fn get_ptr(&self) -> *mut t_config_option {
         self.ptr
     }
@@ -138,5 +163,5 @@ impl<'a> HiddenConfigOptionT for IntegerOption<'a> {
     }
 }
 
-impl<'a> BaseConfigOption for IntegerOption<'a> {}
-impl<'a> ConfigOptions for IntegerOption<'_> {}
+impl<'a> BaseConfigOption for EnumOption<'a> {}
+impl<'a> ConfigOptions for EnumOption<'_> {}

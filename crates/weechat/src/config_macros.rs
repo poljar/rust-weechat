@@ -16,7 +16,7 @@ macro_rules! option_settings {
             .max($max)
     };
     (Enum, $option_name:ident, $description:literal, $out_type:ty $(,)?) => {
-        weechat::config::IntegerOptionSettings::new(stringify!($option_name))
+        weechat::config::EnumOptionSettings::new(stringify!($option_name))
             .description($description)
             .default_value(<$out_type>::default() as i32)
             .string_values(
@@ -105,8 +105,8 @@ macro_rules! option {
     };
 
     (Enum, $name:ident, $description:literal, $out_type:ty $(,)?) => {
-        $crate::option_create!(Enum, Integer, $name, $description, $out_type);
-        $crate::option_getter!(Integer, $name, stringify!($name), $description, $out_type);
+        $crate::option_create!(Enum, Enum, $name, $description, $out_type);
+        $crate::option_getter!(Enum, $name, stringify!($name), $description, $out_type);
     };
 
     (EvaluatedString, $name:ident, $description:literal, $($args:tt)*) => {
