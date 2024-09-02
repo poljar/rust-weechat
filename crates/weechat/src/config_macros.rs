@@ -309,8 +309,6 @@ macro_rules! section_getter {
 macro_rules! config {
     ($config_name:literal, $(Section $section:ident { $($option:tt)* }), * $(,)?) => {
         #[allow(unused_imports)]
-        use weechat::strum::VariantNames;
-        #[allow(unused_imports)]
         pub struct Config(weechat::config::Config);
 
         impl std::ops::Deref for Config {
