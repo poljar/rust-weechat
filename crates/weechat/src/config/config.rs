@@ -20,7 +20,8 @@ use crate::{
             ConfigSection, ConfigSectionPointers, ConfigSectionSettings, SectionHandle,
             SectionHandleMut, SectionReadCbT, SectionWriteCbT,
         },
-        BaseConfigOption, BooleanOption, ColorOption, ConfigOption, IntegerOption, StringOption,
+        BaseConfigOption, BooleanOption, ColorOption, ConfigOption, EnumOption, IntegerOption,
+        StringOption,
     },
     LossyCString, Weechat,
 };
@@ -320,7 +321,12 @@ impl Config {
                 weechat_ptr,
                 _phantom: PhantomData,
             }),
-            _ => unreachable!(),
+            "enum" => ConfigOption::Enum(EnumOption {
+                ptr: option_ptr,
+                weechat_ptr,
+                _phantom: PhantomData,
+            }),
+            _ => todo!("Outdated option_from_type_and_ptr"),
         }
     }
     fn return_value_to_error(return_value: c_int) -> std::io::Result<()> {
