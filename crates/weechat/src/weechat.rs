@@ -274,13 +274,13 @@ impl Weechat {
         Weechat::check_thread();
         let weechat = unsafe { Weechat::weechat() };
 
-        let printf_date_tags = weechat.get().printf_date_tags.unwrap();
+        let printf_datetime_tags = weechat.get().printf_datetime_tags.unwrap();
 
         let fmt = LossyCString::new("%s");
         let msg = LossyCString::new(msg);
 
         unsafe {
-            printf_date_tags(ptr::null_mut(), 0, ptr::null(), fmt.as_ptr(), msg.as_ptr());
+            printf_datetime_tags(ptr::null_mut(), 0, 0, ptr::null(), fmt.as_ptr(), msg.as_ptr());
         }
     }
 
