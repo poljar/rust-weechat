@@ -25,7 +25,7 @@ fn build(file: &str) -> Result<Bindings, BindgenError> {
         "WEECHAT_HOOK_SIGNAL_INT",
         "WEECHAT_HOOK_SIGNAL_POINTER",
     ];
-    let mut builder = bindgen::Builder::default().rustfmt_bindings(true);
+    let mut builder = bindgen::Builder::default();
 
     builder = builder.header(file);
 
