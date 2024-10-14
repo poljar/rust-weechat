@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/poljar/rust-weechat.svg?branch=master)](https://travis-ci.org/poljar/rust-weechat)
+[![CI](https://github.com/poljar/rust-weechat/actions/workflows/ci.yml/badge.svg)](https://github.com/poljar/rust-weechat/actions/workflows/ci.yml)
 [![Docs](https://docs.rs/weechat/badge.svg)](https://docs.rs/weechat)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
