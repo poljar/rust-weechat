@@ -10,6 +10,8 @@ use crate::{
     Weechat,
 };
 
+type IntegerOptionCallback = Box<dyn FnMut(&Weechat, &IntegerOption)>;
+
 /// Settings for a new integer option.
 #[derive(Default)]
 pub struct IntegerOptionSettings {
@@ -23,7 +25,7 @@ pub struct IntegerOptionSettings {
 
     pub(crate) max: i32,
 
-    pub(crate) change_cb: Option<Box<dyn FnMut(&Weechat, &IntegerOption)>>,
+    pub(crate) change_cb: Option<IntegerOptionCallback>,
 }
 
 impl IntegerOptionSettings {
@@ -139,4 +141,4 @@ impl<'a> HiddenConfigOptionT for IntegerOption<'a> {
 }
 
 impl<'a> BaseConfigOption for IntegerOption<'a> {}
-impl<'a> ConfigOptions for IntegerOption<'_> {}
+impl<'a> ConfigOptions for IntegerOption<'a> {}

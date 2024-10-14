@@ -60,8 +60,8 @@ impl BarItem {
     ///
     /// * `name` - The name of the new bar item.
     ///
-    /// * `callback` - The callback that should be called after the bar items
-    /// is marked to be updated.
+    /// * `callback` - The callback that should be called after the bar items is
+    ///   marked to be updated.
     ///
     /// # Panics
     ///

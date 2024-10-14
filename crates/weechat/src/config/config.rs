@@ -120,8 +120,7 @@ impl Weechat {
     /// # Arguments
     ///
     /// * `option_name` - The full name of the option that should be searched
-    ///   for
-    /// (format: "file.section.option").
+    ///   for (format: "file.section.option").
     pub fn config_get(&self, option_name: &str) -> Option<ConfigOption> {
         let weechat = Weechat::from_ptr(self.ptr);
         let config_get = weechat.get().config_get.unwrap();
@@ -164,7 +163,7 @@ impl Weechat {
         unsafe {
             let result = config_set_plugin(self.ptr, option_name.as_ptr(), value.as_ptr());
 
-            OptionChanged::from_int(result as i32)
+            OptionChanged::from_int(result)
         }
     }
 }
@@ -179,7 +178,7 @@ impl Drop for Config {
 
         unsafe {
             // Now drop the config.
-            Box::from_raw(self._config_data);
+            drop(Box::from_raw(self._config_data));
             config_free(self.inner.ptr)
         };
     }
@@ -207,7 +206,7 @@ impl Config {
     /// * `name` - Name of the new configuration file
     ///
     /// * `reload_callback` - Callback that will be called when the
-    /// configuration file is reloaded.
+    ///   configuration file is reloaded.
     ///
     /// # Examples
     ///
@@ -261,11 +260,7 @@ impl Config {
         let weechat = unsafe { Weechat::weechat() };
 
         let c_name = LossyCString::new(name);
-
-        let c_reload_cb = match callback {
-            Some(_) => Some(c_reload_cb as ReloadCB),
-            None => None,
-        };
+        let c_reload_cb = callback.as_ref().map(|_| c_reload_cb as ReloadCB);
 
         let config_pointers =
             Box::new(ConfigPointers { reload_cb: callback, weechat_ptr: weechat.ptr });
@@ -284,7 +279,7 @@ impl Config {
         };
 
         if config_ptr.is_null() {
-            unsafe { Box::from_raw(config_pointers_ref) };
+            unsafe { drop(Box::from_raw(config_pointers_ref)) };
             return Err(());
         };
 
@@ -367,7 +362,7 @@ impl Config {
     /// # Arguments
     ///
     /// * `section_settings` - Settings that decide how the section will be
-    /// created.
+    ///   created.
     ///
     /// # Panics
     ///
@@ -518,7 +513,7 @@ impl Config {
         };
 
         if ptr.is_null() {
-            unsafe { Box::from_raw(section_data_ptr) };
+            unsafe { drop(Box::from_raw(section_data_ptr)) };
             return Err(());
         };
 

@@ -37,7 +37,7 @@
 
 #![deny(missing_docs)]
 #![allow(clippy::result_unit_err)]
-#![cfg_attr(feature = "docs", feature(doc_cfg))]
+#![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
 use std::ffi::CString;
 
@@ -88,7 +88,6 @@ pub trait Plugin: Sized {
 }
 
 #[cfg(feature = "async")]
-#[cfg_attr(feature = "docs", doc(cfg(r#async)))]
 pub use executor::Task;
 
 /// Status values for Weechat callbacks

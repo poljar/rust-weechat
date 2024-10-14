@@ -10,7 +10,8 @@ use crate::{
     Weechat,
 };
 
-type StringCheckCb = Option<Box<dyn FnMut(&Weechat, &StringOption, Cow<str>) -> bool>>;
+type StringCheckCb = Box<dyn FnMut(&Weechat, &StringOption, Cow<str>) -> bool>;
+type StringChangeCallback = Box<dyn FnMut(&Weechat, &StringOption)>;
 
 /// Settings for a new string option.
 #[derive(Default)]
@@ -21,9 +22,9 @@ pub struct StringOptionSettings {
 
     pub(crate) default_value: String,
 
-    pub(crate) change_cb: Option<Box<dyn FnMut(&Weechat, &StringOption)>>,
+    pub(crate) change_cb: Option<StringChangeCallback>,
 
-    pub(crate) check_cb: StringCheckCb,
+    pub(crate) check_cb: Option<StringCheckCb>,
 }
 
 impl StringOptionSettings {
@@ -143,4 +144,4 @@ impl<'a> HiddenConfigOptionT for StringOption<'a> {
 }
 
 impl<'a> BaseConfigOption for StringOption<'a> {}
-impl<'a> ConfigOptions for StringOption<'_> {}
+impl<'a> ConfigOptions for StringOption<'a> {}

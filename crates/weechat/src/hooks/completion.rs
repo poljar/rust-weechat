@@ -24,12 +24,12 @@ pub trait CompletionCallback {
     /// * `weechat` - A Weechat context.
     ///
     /// * `buffer` - The currently active buffer that requested the completion
-    /// to run.
+    ///   to run.
     ///
     /// * `completion_name` - The name of the completion.
     ///
     /// * `completion` - The completion object that should be populated with
-    /// completion words by the callback.
+    ///   completion words by the callback.
     fn callback(
         &mut self,
         weechat: &Weechat,
