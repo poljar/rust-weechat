@@ -4,7 +4,7 @@
 use std::future::Future;
 use std::{
     ffi::{CStr, CString},
-    panic::PanicInfo,
+    panic::PanicHookInfo,
     path::PathBuf,
     ptr, vec,
 };
@@ -139,7 +139,7 @@ impl Weechat {
         Weechat { ptr }
     }
 
-    fn panic_hook(info: &PanicInfo) {
+    fn panic_hook(info: &PanicHookInfo) {
         let current_thread = std::thread::current();
         let weechat_thread = Weechat::thread_id();
 
@@ -287,6 +287,7 @@ impl Weechat {
 
     fn thread_id() -> std::thread::ThreadId {
         *unsafe {
+            #[allow(static_mut_refs)]
             WEECHAT_THREAD_ID.as_ref().expect(
                 "Weechat main thread ID wasn't found, plugin \
                  wasn't correctly initialized",
@@ -295,6 +296,7 @@ impl Weechat {
     }
 
     pub(crate) fn check_thread() {
+        #[allow(static_mut_refs)]
         let weechat_thread_id = unsafe {
             WEECHAT_THREAD_ID.as_ref().expect(
                 "Weechat main thread ID wasn't found, plugin \
