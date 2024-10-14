@@ -78,7 +78,7 @@ pub struct Nick<'a> {
     pub(crate) buffer: PhantomData<&'a Buffer<'a>>,
 }
 
-impl<'a> Nick<'a> {
+impl Nick<'_> {
     /// Get a Weechat object out of the nick.
     fn get_weechat(&self) -> Weechat {
         Weechat::from_ptr(self.weechat_ptr)

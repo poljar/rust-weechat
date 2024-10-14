@@ -15,7 +15,7 @@ pub struct NickGroup<'a> {
     pub(crate) buffer: PhantomData<&'a Buffer<'a>>,
 }
 
-impl<'a> NickGroup<'a> {
+impl NickGroup<'_> {
     fn get_weechat(&self) -> Weechat {
         Weechat::from_ptr(self.weechat_ptr)
     }

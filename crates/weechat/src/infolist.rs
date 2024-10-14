@@ -82,7 +82,7 @@ pub struct InfolistItem<'a> {
     infolist: PhantomData<&'a Infolist<'a>>,
 }
 
-impl<'a> Debug for InfolistItem<'a> {
+impl Debug for InfolistItem<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_map().entries(self.fields.iter()).finish()
     }
@@ -239,7 +239,7 @@ pub enum InfolistVariable<'a> {
     Buffer(Buffer<'a>),
 }
 
-impl<'a> Infolist<'a> {
+impl Infolist<'_> {
     fn is_pointer_buffer(infolist_name: &str, variable_name: &str) -> bool {
         matches!(
             (infolist_name, variable_name),
@@ -291,7 +291,7 @@ impl<'a> Infolist<'a> {
     }
 }
 
-impl<'a> Drop for Infolist<'a> {
+impl Drop for Infolist<'_> {
     fn drop(&mut self) {
         let infolist_free = self.weechat.get().infolist_free.unwrap();
 

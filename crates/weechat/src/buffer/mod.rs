@@ -39,7 +39,7 @@ pub struct Buffer<'a> {
     pub(crate) inner: InnerBuffers<'a>,
 }
 
-impl<'a> std::fmt::Debug for Buffer<'a> {
+impl std::fmt::Debug for Buffer<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Buffer").field("full_name", &self.full_name()).finish()
     }
@@ -50,7 +50,7 @@ pub(crate) enum InnerBuffers<'a> {
     OwnedBuffer(InnerOwnedBuffer<'a>),
 }
 
-impl<'a> InnerBuffers<'a> {
+impl InnerBuffers<'_> {
     fn is_closing(&self) -> bool {
         match self {
             InnerBuffers::BorrowedBuffer(b) => b.closing.get(),
@@ -66,7 +66,7 @@ impl<'a> InnerBuffers<'a> {
     }
 }
 
-impl<'a> InnerBuffers<'a> {
+impl InnerBuffers<'_> {
     pub(crate) fn weechat(&self) -> &Weechat {
         match self {
             InnerBuffers::BorrowedBuffer(b) => b.weechat,
