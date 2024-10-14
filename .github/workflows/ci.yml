@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  style:
+    name: Check style
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repo
+      uses: actions/checkout@v4
+
+    - name: Install rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: nightly
+        components: rustfmt
+
+    - name: Cargo fmt
+      run: cargo fmt --all -- --check
+
+  typos:
+    name: Spell Check with Typos
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Actions Repository
+      uses: actions/checkout@v4
+
+    - name: Check the spelling of the files in our repo
+      uses: crate-ci/typos@master
+
+  clippy:
+    name: Run clippy
+    needs: [style]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repo
+      uses: actions/checkout@v4
+
+    - name: Install WeeChat
+      run: |
+        sudo apt-get update
+        sudo apt-get install weechat-dev
+
+
+    - name: Install rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: nightly
+        components: clippy
+
+    - uses: Swatinem/rust-cache@v2
+
+    - name: Clippy
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
+  test:
+    name: ${{ matrix.target.name }} ${{ matrix.channel }}
+    needs: [clippy]
+
+    runs-on: ${{ matrix.target.os }}
+    strategy:
+      matrix:
+        target: [
+          { "os": "ubuntu-latest",  "toolchain": "x86_64-unknown-linux-gnu", "name": "Linux GNU" },
+          # TODO: Add some more OS variants here.
+        ]
+        channel: [stable, beta, nightly]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install WeeChat
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install weechat-dev
+
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ format('{0}-{1}', matrix.channel, matrix.target.toolchain) }}
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Test
+        run: cargo test --all-features
