@@ -90,7 +90,6 @@ impl<F> FdHook<F> {
     /// # Example
     ///
     /// ```no_run
-    ///
     /// # use weechat::{Weechat, hooks::{FdHook, FdHookMode, FdHookCallback}};
     /// # use pipe_channel::{channel, Receiver, Sender};
     ///
