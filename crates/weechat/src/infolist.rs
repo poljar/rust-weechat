@@ -97,7 +97,7 @@ impl<'a> InfolistItem<'a> {
         unsafe { infolist_integer(self.ptr, name.as_ptr()) }
     }
 
-    fn string(&'a self, name: &str) -> Option<Cow<str>> {
+    fn string(&self, name: &str) -> Option<Cow<str>> {
         let name = LossyCString::new(name);
 
         let infolist_string = self.weechat.get().infolist_string.unwrap();
