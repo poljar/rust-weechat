@@ -20,7 +20,10 @@ macro_rules! option_settings {
             .description($description)
             .default_value(<$out_type>::default() as i32)
             .string_values(
-                <$out_type>::VARIANTS.iter().map(|v| v.to_string()).collect::<Vec<String>>(),
+                <$out_type as weechat::strum::VariantNames>::VARIANTS
+                    .iter()
+                    .map(|v| v.to_string())
+                    .collect::<Vec<String>>(),
             );
     };
 }
