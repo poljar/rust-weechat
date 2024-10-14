@@ -88,7 +88,7 @@ pub struct ColorOption<'a> {
     pub(crate) _phantom: PhantomData<&'a ConfigSection>,
 }
 
-impl<'a> ColorOption<'a> {
+impl ColorOption<'_> {
     /// Get the value of the option.
     pub fn value(&self) -> Cow<str> {
         let weechat = self.get_weechat();
@@ -100,13 +100,13 @@ impl<'a> ColorOption<'a> {
     }
 }
 
-impl<'a> FromPtrs for ColorOption<'a> {
+impl FromPtrs for ColorOption<'_> {
     fn from_ptrs(option_ptr: *mut t_config_option, weechat_ptr: *mut t_weechat_plugin) -> Self {
         ColorOption { ptr: option_ptr, weechat_ptr, _phantom: PhantomData }
     }
 }
 
-impl<'a> HiddenConfigOptionT for ColorOption<'a> {
+impl HiddenConfigOptionT for ColorOption<'_> {
     fn get_ptr(&self) -> *mut t_config_option {
         self.ptr
     }
@@ -116,5 +116,5 @@ impl<'a> HiddenConfigOptionT for ColorOption<'a> {
     }
 }
 
-impl<'a> BaseConfigOption for ColorOption<'a> {}
-impl<'a> ConfigOptions for ColorOption<'a> {}
+impl BaseConfigOption for ColorOption<'_> {}
+impl ConfigOptions for ColorOption<'_> {}

@@ -15,7 +15,7 @@ pub struct Window<'a> {
     pub(crate) phantom: PhantomData<&'a Buffer<'a>>,
 }
 
-impl<'a> Window<'a> {
+impl Window<'_> {
     fn get_integer(&self, property: &str) -> i32 {
         let weechat = Weechat::from_ptr(self.weechat);
         let get_integer = weechat.get().window_get_integer.unwrap();

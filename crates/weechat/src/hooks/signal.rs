@@ -43,13 +43,13 @@ impl<'a> From<&'a str> for SignalData<'a> {
     }
 }
 
-impl<'a> From<String> for SignalData<'a> {
+impl From<String> for SignalData<'_> {
     fn from(val: String) -> Self {
         SignalData::String(Cow::from(val))
     }
 }
 
-impl<'a> From<i32> for SignalData<'a> {
+impl From<i32> for SignalData<'_> {
     fn from(val: i32) -> Self {
         SignalData::Integer(val)
     }

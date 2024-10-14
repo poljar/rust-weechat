@@ -42,7 +42,7 @@ impl<'a> Iterator for BufferLines<'a> {
     }
 }
 
-impl<'a> DoubleEndedIterator for BufferLines<'a> {
+impl DoubleEndedIterator for BufferLines<'_> {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.done {
             None

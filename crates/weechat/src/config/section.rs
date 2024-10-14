@@ -124,7 +124,7 @@ pub struct SectionHandle<'a> {
     pub(crate) inner: Ref<'a, ConfigSection>,
 }
 
-impl<'a> Deref for SectionHandle<'a> {
+impl Deref for SectionHandle<'_> {
     type Target = ConfigSection;
 
     fn deref(&self) -> &Self::Target {
@@ -132,7 +132,7 @@ impl<'a> Deref for SectionHandle<'a> {
     }
 }
 
-impl<'a> Deref for SectionHandleMut<'a> {
+impl Deref for SectionHandleMut<'_> {
     type Target = ConfigSection;
 
     fn deref(&self) -> &Self::Target {
@@ -140,7 +140,7 @@ impl<'a> Deref for SectionHandleMut<'a> {
     }
 }
 
-impl<'a> DerefMut for SectionHandleMut<'a> {
+impl DerefMut for SectionHandleMut<'_> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.inner
     }
