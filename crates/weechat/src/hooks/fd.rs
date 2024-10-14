@@ -90,7 +90,7 @@ impl<F> FdHook<F> {
     /// # Example
     ///
     /// ```no_run
-    /// 
+    ///
     /// # use weechat::{Weechat, hooks::{FdHook, FdHookMode, FdHookCallback}};
     /// # use pipe_channel::{channel, Receiver, Sender};
     ///
@@ -126,10 +126,10 @@ impl<F> FdHook<F> {
         ) -> c_int {
             let hook_data: &mut FdHookData<F> = { &mut *(pointer as *mut FdHookData<F>) };
             let cb = &mut hook_data.callback;
-            let mut fd_object = &mut hook_data.fd_object;
+            let fd_object = &mut hook_data.fd_object;
             let weechat = Weechat::from_ptr(hook_data.weechat_ptr);
 
-            cb.callback(&weechat, &mut fd_object);
+            cb.callback(&weechat, fd_object);
 
             WEECHAT_RC_OK
         }

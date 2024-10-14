@@ -11,6 +11,7 @@ use std::{
 
 use weechat_sys::{t_config_file, t_config_option, t_config_section, t_weechat_plugin};
 
+use super::config_options::OptionCallback;
 use crate::{
     config::{
         config_options::{CheckCB, OptionPointers, OptionType},
@@ -127,7 +128,7 @@ impl<'a> Deref for SectionHandle<'a> {
     type Target = ConfigSection;
 
     fn deref(&self) -> &Self::Target {
-        &*self.inner
+        &self.inner
     }
 }
 
@@ -135,13 +136,13 @@ impl<'a> Deref for SectionHandleMut<'a> {
     type Target = ConfigSection;
 
     fn deref(&self) -> &Self::Target {
-        &*self.inner
+        &self.inner
     }
 }
 
 impl<'a> DerefMut for SectionHandleMut<'a> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut *self.inner
+        &mut self.inner
     }
 }
 
@@ -170,8 +171,8 @@ pub trait SectionWriteCallback: 'static {
     /// * `config` - A borrowed version of the Weechat configuration object.
     ///
     /// * `section` - The section that is being written, if the Config struct is
-    /// contained inside of `self` make sure not to borrow the same section
-    /// again.
+    ///   contained inside of `self` make sure not to borrow the same section
+    ///   again.
     fn callback(&mut self, weechat: &Weechat, config: &Conf, section: &mut ConfigSection);
 }
 
@@ -196,8 +197,8 @@ pub trait SectionWriteDefaultCallback: 'static {
     /// * `config` - A borrowed version of the Weechat configuration object.
     ///
     /// * `section` - The section that is being populated with default values,
-    /// if the Config struct is contained inside of `self` make sure not to
-    /// borrow the same section again.
+    ///   if the Config struct is contained inside of `self` make sure not to
+    ///   borrow the same section again.
     fn callback(&mut self, weechat: &Weechat, config: &Conf, section: &mut ConfigSection);
 }
 
@@ -223,8 +224,8 @@ pub trait SectionReadCallback: 'static {
     /// * `config` - A borrowed version of the Weechat configuration object.
     ///
     /// * `section` - The section that is being populated with default values,
-    /// if the Config struct is contained inside of `self` make sure not to
-    /// borrow the same section again.
+    ///   if the Config struct is contained inside of `self` make sure not to
+    ///   borrow the same section again.
     ///
     /// * `option_name` - The name of the option that is currently being read.
     ///
@@ -373,26 +374,26 @@ impl Drop for ConfigSection {
             unsafe {
                 match option_ptrs {
                     ConfigOptionPointers::Integer(p) => {
-                        Box::from_raw(p as *mut OptionPointers<IntegerOption>);
+                        drop(Box::from_raw(p as *mut OptionPointers<IntegerOption>));
                     }
                     ConfigOptionPointers::Boolean(p) => {
-                        Box::from_raw(p as *mut OptionPointers<BooleanOption>);
+                        drop(Box::from_raw(p as *mut OptionPointers<BooleanOption>));
                     }
                     ConfigOptionPointers::String(p) => {
-                        Box::from_raw(p as *mut OptionPointers<StringOption>);
+                        drop(Box::from_raw(p as *mut OptionPointers<StringOption>));
                     }
                     ConfigOptionPointers::Color(p) => {
-                        Box::from_raw(p as *mut OptionPointers<ColorOption>);
+                        drop(Box::from_raw(p as *mut OptionPointers<ColorOption>));
                     }
                     ConfigOptionPointers::Enum(p) => {
-                        Box::from_raw(p as *mut OptionPointers<EnumOption>);
+                        drop(Box::from_raw(p as *mut OptionPointers<EnumOption>));
                     }
                 }
             }
         }
 
         unsafe {
-            Box::from_raw(self.section_data as *mut ConfigSectionPointers);
+            drop(Box::from_raw(self.section_data as *mut ConfigSectionPointers));
             options_free(self.ptr);
             section_free(self.ptr);
         };
@@ -684,8 +685,8 @@ impl ConfigSection {
         &self,
         option_description: OptionDescription,
         check_cb: Option<Box<CheckCB<T>>>,
-        change_cb: Option<Box<dyn FnMut(&Weechat, &T)>>,
-        delete_cb: Option<Box<dyn FnMut(&Weechat, &T)>>,
+        change_cb: Option<OptionCallback<T>>,
+        delete_cb: Option<OptionCallback<T>>,
     ) -> Option<(*mut t_config_option, *const c_void)>
     where
         T: ConfigOptions,
@@ -757,10 +758,7 @@ impl ConfigSection {
         let default_value = LossyCString::new(option_description.default_value);
         let value = LossyCString::new(option_description.value);
 
-        let c_check_cb = match check_cb {
-            Some(_) => Some(c_check_cb::<T> as WeechatOptCheckCbT),
-            None => None,
-        };
+        let c_check_cb = check_cb.as_ref().map(|_| c_check_cb::<T> as WeechatOptCheckCbT);
 
         let c_change_cb: Option<WeechatOptChangeCbT> = match change_cb {
             Some(_) => Some(c_change_cb::<T>),

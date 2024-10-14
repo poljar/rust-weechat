@@ -143,10 +143,11 @@ pub trait BaseConfigOption: HiddenConfigOptionT {
 pub trait ConfigOptions: BaseConfigOption + FromPtrs {}
 
 pub(crate) type CheckCB<T> = dyn FnMut(&Weechat, &T, Cow<str>) -> bool;
+pub(crate) type OptionCallback<T> = Box<dyn FnMut(&Weechat, &T)>;
 
 pub(crate) struct OptionPointers<T> {
     pub(crate) weechat_ptr: *mut t_weechat_plugin,
     pub(crate) check_cb: Option<Box<CheckCB<T>>>,
-    pub(crate) change_cb: Option<Box<dyn FnMut(&Weechat, &T)>>,
-    pub(crate) delete_cb: Option<Box<dyn FnMut(&Weechat, &T)>>,
+    pub(crate) change_cb: Option<OptionCallback<T>>,
+    pub(crate) delete_cb: Option<OptionCallback<T>>,
 }

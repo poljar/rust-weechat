@@ -130,7 +130,7 @@ impl<'a> Window<'a> {
     /// # Arguments
     ///
     /// * `title` - The new title that should be set for the terminal, the
-    /// string is evaluated, so variables like ${info:version} can be used.
+    ///   string is evaluated, so variables like ${info:version} can be used.
     pub fn set_title(&self, title: &str) {
         self.set_title_helper(Some(title));
     }

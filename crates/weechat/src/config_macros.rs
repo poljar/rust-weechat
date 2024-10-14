@@ -304,7 +304,6 @@ macro_rules! section_getter {
 /// );
 /// ```
 #[cfg(feature = "config_macro")]
-#[cfg_attr(feature = "docs", doc(cfg(config_macro)))]
 #[macro_export]
 macro_rules! config {
     ($config_name:literal, $(Section $section:ident { $($option:tt)* }), * $(,)?) => {

@@ -10,6 +10,8 @@ use crate::{
     Weechat,
 };
 
+type EnumChangeCallback = Box<dyn FnMut(&Weechat, &EnumOption)>;
+
 /// Settings for a new enum option.
 #[derive(Default)]
 pub struct EnumOptionSettings {
@@ -25,13 +27,14 @@ pub struct EnumOptionSettings {
 
     pub(crate) string_values: String,
 
-    pub(crate) change_cb: Option<Box<dyn FnMut(&Weechat, &EnumOption)>>,
+    pub(crate) change_cb: Option<EnumChangeCallback>,
 }
 
 impl EnumOptionSettings {
     /// Create new settings that can be used to create a new enum option.
     ///
-    /// An enum option is represented as integer (index of enum value) internally
+    /// An enum option is represented as integer (index of enum value)
+    /// internally
     ///
     /// # Arguments
     ///
@@ -164,4 +167,4 @@ impl<'a> HiddenConfigOptionT for EnumOption<'a> {
 }
 
 impl<'a> BaseConfigOption for EnumOption<'a> {}
-impl<'a> ConfigOptions for EnumOption<'_> {}
+impl<'a> ConfigOptions for EnumOption<'a> {}

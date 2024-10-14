@@ -197,7 +197,9 @@ pub fn plugin(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
             let weechat = unsafe {
                 Weechat::init_from_ptr(plugin)
             };
-            let args = Args::new(argc, argv);
+
+            let args = unsafe { Args::new(argc, argv) };
+
             match <#plugin as ::weechat::Plugin>::init(&weechat, args) {
                 Ok(p) => {
                     unsafe {
