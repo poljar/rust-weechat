@@ -145,12 +145,14 @@ impl WeechatExecutor {
 
     pub fn free() {
         unsafe {
+            #[allow(static_mut_refs)]
             _EXECUTOR.take();
         }
     }
 
     pub fn start() {
         let executor = WeechatExecutor::new();
+        #[allow(static_mut_refs)]
         unsafe {
             _EXECUTOR = Some(executor);
         }
@@ -161,6 +163,7 @@ impl WeechatExecutor {
     where
         F: Future<Output = ()> + Send + 'static,
     {
+        #[allow(static_mut_refs)]
         let executor = unsafe { _EXECUTOR.as_ref().expect("Executor wasn't started") };
 
         let future = Box::pin(future);
@@ -180,6 +183,7 @@ impl WeechatExecutor {
         F: Future + 'static,
         F::Output: 'static,
     {
+        #[allow(static_mut_refs)]
         let executor = unsafe { _EXECUTOR.as_ref() };
         executor.map(|executor| executor.spawn_local(future))
     }
@@ -189,6 +193,7 @@ impl WeechatExecutor {
         F: Future + 'static,
         F::Output: 'static,
     {
+        #[allow(static_mut_refs)]
         let executor = unsafe { _EXECUTOR.as_ref().expect("Executor wasn't started") };
 
         let sender = Arc::downgrade(&executor.sender);
