@@ -63,13 +63,13 @@ impl Args {
     /// needs to be public because it's used in the macro expansion of the
     /// plugin init method.
     #[doc(hidden)]
-    pub fn new(argc: c_int, argv: *mut *mut c_char) -> Args {
+    pub unsafe fn new(argc: c_int, argv: *mut *mut c_char) -> Args {
         let argc = argc as isize;
         let args: Vec<String> = (0..argc)
             .map(|i| {
                 let cstr = unsafe { CStr::from_ptr(*argv.offset(i) as *const libc::c_char) };
 
-                String::from_utf8_lossy(&cstr.to_bytes().to_vec()).to_string()
+                String::from_utf8_lossy(cstr.to_bytes()).to_string()
             })
             .collect();
         Args { iter: args.into_iter() }
@@ -235,6 +235,7 @@ impl Weechat {
     ///
     /// Since this one will have a static lifetime, objects that are fetched
     /// from this object may have a longer lifetime than they should.
+    #[allow(clippy::self_named_constructors)]
     pub unsafe fn weechat() -> &'static mut Weechat {
         match WEECHAT {
             Some(ref mut w) => w,
@@ -526,11 +527,11 @@ impl Weechat {
     ///
     /// * `modifier` - The name of a modifier. The list of modifiers can be
     ///   found in the official
-    /// [Weechat documentation](https://weechat.org/files/doc/stable/weechat_plugin_api.en.html#_hook_modifier_exec).
+    ///   [Weechat documentation](https://weechat.org/files/doc/stable/weechat_plugin_api.en.html#_hook_modifier_exec).
     ///
     /// * `modifier_data` - Data that will be passed to the modifier, this
-    /// depends on the modifier that was chosen, consult the list of modifiers
-    /// in the Weechat documentation.
+    ///   depends on the modifier that was chosen, consult the list of modifiers
+    ///   in the Weechat documentation.
     ///
     /// * `input_string` - The string that should be modified.
     ///
@@ -619,7 +620,6 @@ impl Weechat {
     /// block_on(tx.send("Hello world".to_string()));
     /// ```
     #[cfg(feature = "async")]
-    #[cfg_attr(feature = "docs", doc(cfg(r#async)))]
     pub fn spawn<F>(future: F) -> Task<F::Output>
     where
         F: Future + 'static,
@@ -666,7 +666,6 @@ impl Weechat {
     /// }
     /// ```
     #[cfg(feature = "async")]
-    #[cfg_attr(feature = "docs", doc(cfg(r#async)))]
     pub fn spawn_checked<F>(future: F) -> Option<Task<F::Output>>
     where
         F: Future + 'static,
@@ -681,7 +680,6 @@ impl Weechat {
     /// This can be called from any thread and will execute the future on the
     /// main Weechat thread.
     #[cfg(feature = "async")]
-    #[cfg_attr(feature = "docs", doc(cfg(r#async)))]
     pub fn spawn_from_thread<F>(future: F)
     where
         F: Future<Output = ()> + Send + 'static,

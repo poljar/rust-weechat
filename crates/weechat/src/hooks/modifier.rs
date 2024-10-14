@@ -7,7 +7,7 @@ use super::Hook;
 use crate::{buffer::Buffer, LossyCString, Weechat};
 
 /// Hook for a modifier, the hook is removed when the object is dropped.
-#[cfg_attr(feature = "docs", doc(cfg(unsound)))]
+#[cfg_attr(docsrs, doc(cfg(unsound)))]
 pub struct ModifierHook {
     _hook: Hook,
     _hook_data: Box<ModifierHookData>,
@@ -131,8 +131,8 @@ impl ModifierHook {
     /// * `modifier_name` - The modifier to hook.
     ///
     /// * `callback` - A function or a struct that implements ModifierCallback,
-    /// the callback method of the trait will be called when the modifier is
-    /// fired.
+    ///   the callback method of the trait will be called when the modifier is
+    ///   fired.
     ///
     /// # Panics
     ///
@@ -158,7 +158,7 @@ impl ModifierHook {
     ///     None
     /// });
     /// ```
-    #[cfg_attr(feature = "docs", doc(cfg(unsound)))]
+    #[cfg_attr(docsrs, doc(cfg(unsound)))]
     pub fn new(modifier_name: &str, callback: impl ModifierCallback + 'static) -> Result<Self, ()> {
         unsafe extern "C" fn c_hook_cb(
             pointer: *const c_void,

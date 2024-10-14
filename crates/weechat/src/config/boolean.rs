@@ -10,6 +10,8 @@ use crate::{
     Weechat,
 };
 
+type BooleanChangeCallback = Box<dyn FnMut(&Weechat, &BooleanOption)>;
+
 /// Settings for a new boolean option.
 #[derive(Default)]
 pub struct BooleanOptionSettings {
@@ -19,7 +21,7 @@ pub struct BooleanOptionSettings {
 
     pub(crate) default_value: bool,
 
-    pub(crate) change_cb: Option<Box<dyn FnMut(&Weechat, &BooleanOption)>>,
+    pub(crate) change_cb: Option<BooleanChangeCallback>,
 }
 
 impl BooleanOptionSettings {
@@ -114,7 +116,7 @@ impl<'a> HiddenConfigOptionT for BooleanOption<'a> {
 }
 
 impl<'a> BaseConfigOption for BooleanOption<'a> {}
-impl<'a> ConfigOptions for BooleanOption<'_> {}
+impl<'a> ConfigOptions for BooleanOption<'a> {}
 
 impl<'a> PartialEq<bool> for BooleanOption<'a> {
     fn eq(&self, other: &bool) -> bool {

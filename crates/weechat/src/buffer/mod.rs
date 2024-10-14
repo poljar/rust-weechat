@@ -69,7 +69,7 @@ impl<'a> InnerBuffers<'a> {
 impl<'a> InnerBuffers<'a> {
     pub(crate) fn weechat(&self) -> &Weechat {
         match self {
-            InnerBuffers::BorrowedBuffer(b) => &b.weechat,
+            InnerBuffers::BorrowedBuffer(b) => b.weechat,
             InnerBuffers::OwnedBuffer(b) => &b.weechat,
         }
     }
@@ -95,7 +95,7 @@ impl PartialEq for Buffer<'_> {
 
 impl PartialOrd for Buffer<'_> {
     fn partial_cmp(&self, other: &Buffer) -> Option<Ordering> {
-        self.number().partial_cmp(&other.number())
+        Some(self.number().cmp(&other.number()))
     }
 }
 
@@ -220,7 +220,6 @@ impl<T: FnMut(&Weechat, &Buffer) -> Result<(), ()> + 'static> BufferCloseCallbac
 }
 
 #[cfg(feature = "async")]
-#[cfg_attr(feature = "docs", doc(cfg(r#async)))]
 #[async_trait(?Send)]
 /// Trait for the buffer input callback.
 ///
@@ -253,7 +252,6 @@ impl<T: FnMut(BufferHandle, String) -> LocalBoxFuture<'static, ()> + 'static>
 }
 
 #[cfg(feature = "async")]
-#[cfg_attr(feature = "docs", doc(cfg(r#async)))]
 /// Builder for the creation of a buffer.
 pub struct BufferBuilderAsync {
     pub(crate) name: String,
@@ -276,7 +274,7 @@ impl BufferBuilderAsync {
     /// # Arguments
     ///
     /// * `name` - The name of the new buffer. Needs to be unique across a
-    /// plugin, otherwise the buffer creation will fail.
+    ///   plugin, otherwise the buffer creation will fail.
     ///
     /// Returns a Buffer if one has been created, otherwise an empty Error.
     ///
@@ -350,7 +348,7 @@ impl BufferBuilder {
     /// # Arguments
     ///
     /// * `name` - The name of the new buffer. Needs to be unique across a
-    /// plugin, otherwise the buffer creation will fail.
+    ///   plugin, otherwise the buffer creation will fail.
     ///
     /// # Panics
     ///
@@ -392,7 +390,7 @@ impl BufferBuilder {
     /// # Arguments
     ///
     /// * `callback` - A function or a struct that implements the
-    /// BufferCloseCallback trait.
+    ///   BufferCloseCallback trait.
     pub fn input_callback(mut self, callback: impl BufferInputCallback + 'static) -> Self {
         self.input_callback = Some(Box::new(callback));
         self
@@ -478,7 +476,6 @@ impl Weechat {
     }
 
     #[cfg(feature = "async")]
-    #[cfg_attr(feature = "docs", doc(cfg(r#async)))]
     fn buffer_new_with_async(builder: BufferBuilderAsync) -> Result<BufferHandle, ()> {
         unsafe extern "C" fn c_input_cb(
             pointer: *const c_void,
@@ -582,7 +579,7 @@ impl Weechat {
         };
 
         if buf_ptr.is_null() {
-            unsafe { Box::from_raw(buffer_pointers_ref) };
+            unsafe { drop(Box::from_raw(buffer_pointers_ref)) };
             return Err(());
         }
 
@@ -697,7 +694,7 @@ impl Weechat {
         };
 
         if buf_ptr.is_null() {
-            unsafe { Box::from_raw(buffer_pointers_ref) };
+            unsafe { drop(Box::from_raw(buffer_pointers_ref)) };
             return Err(());
         }
 
@@ -728,7 +725,7 @@ pub(crate) type WeechatInputCbT = unsafe extern "C" fn(
 impl Buffer<'_> {
     fn weechat(&self) -> &Weechat {
         match &self.inner {
-            InnerBuffers::BorrowedBuffer(b) => &b.weechat,
+            InnerBuffers::BorrowedBuffer(b) => b.weechat,
             InnerBuffers::OwnedBuffer(b) => &b.weechat,
         }
     }
@@ -830,7 +827,7 @@ impl Buffer<'_> {
     /// Returns a `Nick` if one is found, None otherwise.
     pub fn search_nick(&self, nick: &str) -> Option<Nick> {
         let weechat = self.weechat();
-        let nick = Buffer::search_nick_helper(&weechat, self.ptr(), nick, None);
+        let nick = Buffer::search_nick_helper(weechat, self.ptr(), nick, None);
 
         if nick.is_null() {
             None
@@ -871,7 +868,7 @@ impl Buffer<'_> {
     /// error otherwise.
     pub fn add_nick(&self, nick_settings: NickSettings) -> Result<Nick, ()> {
         let weechat = self.weechat();
-        let nick_ptr = Buffer::add_nick_helper(&weechat, self.ptr(), nick_settings, None);
+        let nick_ptr = Buffer::add_nick_helper(weechat, self.ptr(), nick_settings, None);
 
         if nick_ptr.is_null() {
             return Err(());

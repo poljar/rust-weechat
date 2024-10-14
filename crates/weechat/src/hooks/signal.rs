@@ -37,38 +37,38 @@ pub enum SignalData<'a> {
     Buffer(Buffer<'a>),
 }
 
-impl<'a> Into<SignalData<'a>> for &'a str {
-    fn into(self) -> SignalData<'a> {
-        SignalData::String(Cow::from(self))
+impl<'a> From<&'a str> for SignalData<'a> {
+    fn from(string: &'a str) -> SignalData<'a> {
+        SignalData::String(Cow::from(string))
     }
 }
 
-impl<'a> Into<SignalData<'a>> for String {
-    fn into(self) -> SignalData<'a> {
-        SignalData::String(Cow::from(self))
+impl<'a> From<String> for SignalData<'a> {
+    fn from(val: String) -> Self {
+        SignalData::String(Cow::from(val))
     }
 }
 
-impl<'a> Into<SignalData<'a>> for i32 {
-    fn into(self) -> SignalData<'a> {
-        SignalData::Integer(self)
+impl<'a> From<i32> for SignalData<'a> {
+    fn from(val: i32) -> Self {
+        SignalData::Integer(val)
     }
 }
 
-impl<'a> Into<SignalData<'a>> for Buffer<'a> {
-    fn into(self) -> SignalData<'a> {
-        SignalData::Buffer(self)
+impl<'a> From<Buffer<'a>> for SignalData<'a> {
+    fn from(val: Buffer<'a>) -> Self {
+        SignalData::Buffer(val)
     }
 }
 
-impl<'a> Into<SignalData<'a>> for &'a Buffer<'a> {
-    fn into(self) -> SignalData<'a> {
-        let ptr = self.ptr();
+impl<'a> From<&'a Buffer<'a>> for SignalData<'a> {
+    fn from(val: &'a Buffer<'a>) -> Self {
+        let ptr = val.ptr();
 
         SignalData::Buffer(Buffer {
             inner: InnerBuffers::BorrowedBuffer(InnerBuffer {
                 ptr,
-                weechat: self.inner.weechat(),
+                weechat: val.inner.weechat(),
                 closing: Rc::new(Cell::new(false)),
             }),
         })
@@ -197,8 +197,8 @@ impl SignalHook {
     /// * `signal_name` - The signal to hook (wildcard `*` is allowed).
     ///
     /// * `callback` - A function or a struct that implements SignalCallback,
-    /// the callback method of the trait will be called when the signal is
-    /// fired.
+    ///   the callback method of the trait will be called when the signal is
+    ///   fired.
     ///
     /// # Panics
     ///

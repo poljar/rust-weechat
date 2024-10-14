@@ -10,6 +10,8 @@ use crate::{
     Weechat,
 };
 
+type ColorChangeCallback = Box<dyn FnMut(&Weechat, &ColorOption)>;
+
 /// Settings for a new color option.
 #[derive(Default)]
 pub struct ColorOptionSettings {
@@ -19,7 +21,7 @@ pub struct ColorOptionSettings {
 
     pub(crate) default_value: String,
 
-    pub(crate) change_cb: Option<Box<dyn FnMut(&Weechat, &ColorOption)>>,
+    pub(crate) change_cb: Option<ColorChangeCallback>,
 }
 
 impl ColorOptionSettings {
@@ -115,4 +117,4 @@ impl<'a> HiddenConfigOptionT for ColorOption<'a> {
 }
 
 impl<'a> BaseConfigOption for ColorOption<'a> {}
-impl<'a> ConfigOptions for ColorOption<'_> {}
+impl<'a> ConfigOptions for ColorOption<'a> {}

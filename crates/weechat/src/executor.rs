@@ -96,6 +96,7 @@ impl WeechatExecutor {
         let non_local = Arc::new(Mutex::new(VecDeque::new()));
 
         let executor = WeechatExecutor {
+            #[allow(clippy::arc_with_non_send_sync)]
             _hook: Arc::new(Mutex::new(None)),
             sender,
             futures: queue,
@@ -180,12 +181,7 @@ impl WeechatExecutor {
         F::Output: 'static,
     {
         let executor = unsafe { _EXECUTOR.as_ref() };
-
-        if let Some(executor) = executor {
-            Some(executor.spawn_local(future))
-        } else {
-            None
-        }
+        executor.map(|executor| executor.spawn_local(future))
     }
 
     pub(crate) fn spawn_buffer_cb<F>(buffer_name: String, future: F) -> Task<F::Output>

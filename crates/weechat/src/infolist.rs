@@ -186,7 +186,7 @@ impl<'a> InfolistItem<'a> {
     /// }
     /// ```
     pub fn iter(&'a self) -> Iter<'a> {
-        Iter { keys: self.fields.clone().into_iter(), item: &self }
+        Iter { keys: self.fields.clone().into_iter(), item: self }
     }
 }
 
@@ -305,12 +305,12 @@ impl Weechat {
     /// # Arguments
     ///
     /// * `infolist_name` - The name of the infolist to fetch, valid values for
-    /// this can be found in the Weechat documentation.
+    ///   this can be found in the Weechat documentation.
     ///
     /// * `arguments` - Arguments that should be passed to Weechat while
-    /// fetching the infolist, the format of this will depend on the infolist
-    /// that is being fetched. A list of infolists and their accompanying
-    /// arguments can be found in the Weechat documentation.
+    ///   fetching the infolist, the format of this will depend on the infolist
+    ///   that is being fetched. A list of infolists and their accompanying
+    ///   arguments can be found in the Weechat documentation.
     ///
     /// # Example
     ///
@@ -339,8 +339,7 @@ impl Weechat {
         let infolist_get = self.get().infolist_get.unwrap();
 
         let name = LossyCString::new(infolist_name);
-        let arguments =
-            if let Some(args) = arguments { Some(LossyCString::new(args)) } else { None };
+        let arguments = arguments.map(LossyCString::new);
 
         let infolist_ptr = unsafe {
             infolist_get(
@@ -357,7 +356,7 @@ impl Weechat {
             Ok(Infolist {
                 ptr: infolist_ptr,
                 infolist_name: infolist_name.to_owned(),
-                weechat: &self,
+                weechat: self,
             })
         }
     }
