@@ -94,7 +94,8 @@ impl IntegerOptionSettings {
     /// use weechat::config::IntegerOptionSettings;
     ///
     /// let settings = IntegerOptionSettings::new("server_buffer")
-    ///     .string_values(vec!["independent", "merged"])
+    ///     .min(0)
+    ///     .max(100)
     ///     .set_change_callback(|weechat, option| {
     ///         Weechat::print("Option changed");
     ///     });
