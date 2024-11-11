@@ -776,7 +776,7 @@ impl Buffer<'_> {
     /// * `tags` - A list of tags that will be applied to the printed line.
     ///
     /// * `message` - The message that will be displayed.
-    pub fn print_date_tags(&self, date: i64, tags: &[&str], message: &str) {
+    pub fn print_date_tags(&self, date: isize, tags: &[&str], message: &str) {
         let weechat = self.weechat();
         let printf_date_tags = weechat.get().printf_datetime_tags.unwrap();
 
@@ -786,7 +786,14 @@ impl Buffer<'_> {
         let message = LossyCString::new(message);
 
         unsafe {
-            printf_date_tags(self.ptr(), date, 0, tags.as_ptr(), fmt_str.as_ptr(), message.as_ptr())
+            printf_date_tags(
+                self.ptr(),
+                date as _,
+                0,
+                tags.as_ptr(),
+                fmt_str.as_ptr(),
+                message.as_ptr(),
+            )
         }
     }
 
