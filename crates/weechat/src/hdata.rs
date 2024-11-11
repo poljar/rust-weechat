@@ -47,11 +47,11 @@ impl Weechat {
         hdata: *mut t_hdata,
         pointer: *mut c_void,
         name: &str,
-    ) -> i64 {
+    ) -> isize {
         let hdata_time = self.get().hdata_time.unwrap();
         let name = LossyCString::new(name);
 
-        hdata_time(hdata, pointer, name.as_ptr())
+        hdata_time(hdata, pointer, name.as_ptr()) as _
     }
 
     pub(crate) unsafe fn hdata_char(
