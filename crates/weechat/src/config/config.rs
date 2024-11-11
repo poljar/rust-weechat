@@ -605,10 +605,7 @@ impl Conf {
 
         let option_name = LossyCString::new(key);
 
-        let c_value = match value {
-            Some(v) => LossyCString::new(v).as_ptr(),
-            None => ptr::null(),
-        };
+        let c_value = value.map(LossyCString::new).map(|v| v.as_ptr()).unwrap_or(ptr::null());
 
         unsafe {
             write_line(self.ptr, option_name.as_ptr(), c_value);
