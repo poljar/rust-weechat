@@ -134,7 +134,7 @@ impl<'a> BufferLine<'a> {
     }
 
     /// Get the date of the line.
-    pub fn date(&self) -> i64 {
+    pub fn date(&self) -> isize {
         unsafe { self.weechat.hdata_time(self.hdata(), self.line_data_pointer, "date") }
     }
 
@@ -151,7 +151,7 @@ impl<'a> BufferLine<'a> {
     }
 
     /// Get the date the line was printed.
-    pub fn date_printed(&self) -> i64 {
+    pub fn date_printed(&self) -> isize {
         unsafe { self.weechat.hdata_time(self.hdata(), self.line_data_pointer, "date_printed") }
     }
 
