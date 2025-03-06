@@ -41,13 +41,12 @@ fn build(file: &str) -> Result<Bindings, BindgenError> {
 }
 
 fn main() {
-    let bundled = env::var(WEECHAT_BUNDLED_ENV).map_or(false, |bundled| {
-        match bundled.to_lowercase().as_ref() {
+    let bundled =
+        env::var(WEECHAT_BUNDLED_ENV).is_ok_and(|bundled| match bundled.to_lowercase().as_ref() {
             "1" | "true" | "yes" => true,
             "0" | "false" | "no" => false,
             _ => panic!("Invalid value for WEECHAT_BUNDLED, must be true/false"),
-        }
-    });
+        });
 
     let plugin_file = env::var(WEECHAT_PLUGIN_FILE_ENV);
 
