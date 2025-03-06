@@ -28,18 +28,20 @@ mod color;
 #[allow(clippy::module_inception)]
 mod config;
 mod config_options;
+#[cfg(not(weechat410))]
 mod r#enum;
 mod integer;
 mod section;
 mod string;
 
+#[cfg(not(weechat410))]
+pub use crate::config::r#enum::{EnumOption, EnumOptionSettings};
 pub use crate::config::{
     boolean::{BooleanOption, BooleanOptionSettings},
     color::{ColorOption, ColorOptionSettings},
     config::{Conf, Config, ConfigReloadCallback, OptionChanged},
     config_options::{BaseConfigOption, ConfigOptions, OptionType},
     integer::{IntegerOption, IntegerOptionSettings},
-    r#enum::{EnumOption, EnumOptionSettings},
     section::{
         ConfigOption, ConfigSection, ConfigSectionSettings, SectionHandle, SectionHandleMut,
         SectionReadCallback, SectionWriteCallback, SectionWriteDefaultCallback,

@@ -14,14 +14,15 @@ use weechat_sys::{
     t_config_file, t_config_option, t_config_section, t_weechat_plugin, WEECHAT_RC_OK,
 };
 
+#[cfg(not(weechat410))]
+use crate::config::EnumOption;
 use crate::{
     config::{
         section::{
             ConfigSection, ConfigSectionPointers, ConfigSectionSettings, SectionHandle,
             SectionHandleMut, SectionReadCbT, SectionWriteCbT,
         },
-        BaseConfigOption, BooleanOption, ColorOption, ConfigOption, EnumOption, IntegerOption,
-        StringOption,
+        BaseConfigOption, BooleanOption, ColorOption, ConfigOption, IntegerOption, StringOption,
     },
     LossyCString, Weechat,
 };
@@ -316,6 +317,7 @@ impl Config {
                 weechat_ptr,
                 _phantom: PhantomData,
             }),
+            #[cfg(not(weechat410))]
             "enum" => ConfigOption::Enum(EnumOption {
                 ptr: option_ptr,
                 weechat_ptr,

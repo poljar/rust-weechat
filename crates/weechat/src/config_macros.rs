@@ -15,8 +15,34 @@ macro_rules! option_settings {
             .min($min)
             .max($max)
     };
+    (Enum, $option_name:ident, $description:literal, $($args:tt)*) => {
+        $crate::option_settings_enum!(Enum, $option_name, $description, $($args)*)
+    };
+}
+
+#[cfg(not(weechat410))]
+#[doc(hidden)]
+#[macro_export]
+macro_rules! option_settings_enum {
     (Enum, $option_name:ident, $description:literal, $out_type:ty $(,)?) => {
         weechat::config::EnumOptionSettings::new(stringify!($option_name))
+            .description($description)
+            .default_value(<$out_type>::default() as i32)
+            .string_values(
+                <$out_type as weechat::strum::VariantNames>::VARIANTS
+                    .iter()
+                    .map(|v| v.to_string())
+                    .collect::<Vec<String>>(),
+            );
+    };
+}
+
+#[cfg(weechat410)]
+#[doc(hidden)]
+#[macro_export]
+macro_rules! option_settings_enum {
+    (Enum, $option_name:ident, $description:literal, $out_type:ty $(,)?) => {
+        weechat::config::IntegerOptionSettings::new(stringify!($option_name))
             .description($description)
             .default_value(<$out_type>::default() as i32)
             .string_values(
@@ -84,6 +110,7 @@ macro_rules! option_getter {
     };
 }
 
+#[cfg(not(weechat410))]
 #[doc(hidden)]
 #[macro_export]
 macro_rules! option {
@@ -110,6 +137,41 @@ macro_rules! option {
     (Enum, $name:ident, $description:literal, $out_type:ty $(,)?) => {
         $crate::option_create!(Enum, Enum, $name, $description, $out_type);
         $crate::option_getter!(Enum, $name, stringify!($name), $description, $out_type);
+    };
+
+    (EvaluatedString, $name:ident, $description:literal, $($args:tt)*) => {
+        $crate::option_create!(String, String, $name, $description, $($args)*);
+        $crate::option_getter!(EvaluatedString, $name, stringify!($name), $description);
+    };
+}
+
+#[cfg(weechat410)]
+#[doc(hidden)]
+#[macro_export]
+macro_rules! option {
+    (String, $name:ident, $description:literal, $($args:tt)*) => {
+        $crate::option_create!(String, String, $name, $description, $($args)*);
+        $crate::option_getter!(String, $name, stringify!($name), $description, String);
+    };
+
+    (Color, $name:ident, $description:literal, $($args:tt)*) => {
+        $crate::option_create!(Color, Color, $name, $description, $($args)*);
+        $crate::option_getter!(Color, $name, stringify!($name), $description, String);
+    };
+
+    (bool, $name:ident, $description:literal, $($args:tt)*) => {
+        $crate::option_create!(Boolean, Boolean, $name, $description, $($args)*);
+        $crate::option_getter!(Boolean, $name, stringify!($name), $description, bool);
+    };
+
+    (Integer, $name:ident, $description:literal, $($args:tt)*) => {
+        $crate::option_create!(Integer, Integer, $name, $description, $($args)*);
+        $crate::option_getter!(Integer, $name, stringify!($name), $description, i64);
+    };
+
+    (Enum, $name:ident, $description:literal, $out_type:ty $(,)?) => {
+        $crate::option_create!(Enum, Integer, $name, $description, $out_type);
+        $crate::option_getter!(Integer, $name, stringify!($name), $description, $out_type);
     };
 
     (EvaluatedString, $name:ident, $description:literal, $($args:tt)*) => {
