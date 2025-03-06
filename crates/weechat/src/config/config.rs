@@ -333,7 +333,7 @@ impl Config {
                 Err(IoError::new(ErrorKind::NotFound, "File was not found"))
             }
             weechat_sys::WEECHAT_CONFIG_READ_MEMORY_ERROR => {
-                Err(IoError::new(ErrorKind::Other, "Not enough memory"))
+                Err(IoError::other("Not enough memory"))
             }
             _ => unreachable!(),
         }
