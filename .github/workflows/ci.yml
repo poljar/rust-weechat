@@ -106,3 +106,52 @@ jobs:
 
       - name: Test
         run: cargo test --all-features
+
+  test-api:
+    name: Test Weechat API
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - v3.8
+          - v4.0.0
+          - v4.1.0
+          - v4.2.0
+          - v4.3.0
+          - v4.4.0
+          - v4.5.0
+    env:
+      WEECHAT_BUNDLED: 'no'
+      WEECHAT_PLUGIN_FILE: '${{ github.workspace }}/weechat-src/src/plugins/weechat-plugin.h'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout weechat API header
+        uses: actions/checkout@v4
+        with:
+          repository: 'weechat/weechat'
+          ref: ${{ matrix.version }}
+          path: 'weechat-src'
+          sparse-checkout: src/plugins/weechat-plugin.h
+          sparse-checkout-cone-mode: false
+
+      - run: sudo apt -y update
+      - run: sudo apt -y install libclang-dev
+
+      - name: Install rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Test
+        run: cargo test --all-features
+
+      - name: Build
+        run: cargo build --all-features
+
+      - name: Lint
+        run: cargo clippy --all-features

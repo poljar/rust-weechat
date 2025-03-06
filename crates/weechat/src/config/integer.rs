@@ -25,6 +25,9 @@ pub struct IntegerOptionSettings {
 
     pub(crate) max: i32,
 
+    #[cfg(weechat410)]
+    pub(crate) string_values: String,
+
     pub(crate) change_cb: Option<IntegerOptionCallback>,
 }
 
@@ -58,6 +61,33 @@ impl IntegerOptionSettings {
     /// * `value` - The value that should act as the default value.
     pub fn default_value<V: Into<i32>>(mut self, value: V) -> Self {
         self.default_value = value.into();
+        self
+    }
+
+    /// Set the string values of the option.
+    ///
+    /// This setting decides if the integer option should act as an enum taking
+    /// symbolic values.
+    ///
+    /// # Arguments
+    ///
+    /// * `values` - The values that should act as the symbolic values.
+    ///
+    /// # Examples
+    /// ```no_run
+    /// use weechat::config::IntegerOptionSettings;
+    ///
+    /// let settings = IntegerOptionSettings::new("server_buffer")
+    ///     .string_values(vec!["independent", "merged"]);
+    /// ```
+    #[cfg(weechat410)]
+    pub fn string_values<I, T>(mut self, values: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+        T: Into<String>,
+    {
+        let vec: Vec<String> = values.into_iter().map(Into::into).collect();
+        self.string_values = vec.join("|");
         self
     }
 
