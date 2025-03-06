@@ -51,16 +51,19 @@ fn main() {
     let plugin_file = env::var(WEECHAT_PLUGIN_FILE_ENV);
 
     let bindings = if bundled {
+        println!("cargo::warning=Using vendored header");
         build("src/weechat-plugin.h").expect("Unable to generate bindings")
     } else {
         match plugin_file {
             Ok(file) => {
                 let path = PathBuf::from(file).canonicalize().expect("Can't canonicalize path");
+                println!("cargo::warning=Using system header");
                 build(path.to_str().unwrap_or_default()).unwrap_or_else(|_| {
                     panic!("Unable to generate bindings with the provided {:?}", path)
                 })
             }
             Err(_) => {
+                println!("cargo::warning=Using system header via wrapper.h");
                 let bindings = build("src/wrapper.h");
 
                 match bindings {
