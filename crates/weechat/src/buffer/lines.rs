@@ -75,8 +75,8 @@ impl DoubleEndedIterator for BufferLines<'_> {
 pub struct LineData<'a> {
     pub prefix: Option<&'a str>,
     pub message: Option<&'a str>,
-    pub date: Option<i64>,
-    pub date_printed: Option<i64>,
+    pub date: Option<isize>,
+    pub date_printed: Option<isize>,
     pub tags: Option<&'a [&'a str]>,
 }
 
