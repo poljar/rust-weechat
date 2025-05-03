@@ -120,7 +120,7 @@ impl TimerHook {
         let hook_ptr = unsafe {
             hook_timer(
                 weechat.ptr,
-                interval.as_millis() as i64,
+                interval.as_millis() as _,
                 align_second,
                 max_calls,
                 Some(c_hook_cb),
