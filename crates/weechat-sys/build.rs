@@ -74,8 +74,8 @@ fn main() {
         }
     };
 
-    println!("cargo:rerun-if-env-changed={}", WEECHAT_BUNDLED_ENV);
-    println!("cargo:rerun-if-env-changed={}", WEECHAT_PLUGIN_FILE_ENV);
+    println!("cargo:rerun-if-env-changed={WEECHAT_BUNDLED_ENV}");
+    println!("cargo:rerun-if-env-changed={WEECHAT_PLUGIN_FILE_ENV}");
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     bindings.write_to_file(out_path.join("bindings.rs")).expect("Couldn't write bindings!");
