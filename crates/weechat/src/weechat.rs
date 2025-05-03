@@ -180,7 +180,7 @@ impl Weechat {
             }
             #[cfg(not(feature = "async"))]
             {
-                println!("thread '{}' panicked: {}", thread_name, info);
+                println!("thread '{thread_name}' panicked: {info}");
             }
         }
     }
@@ -358,7 +358,7 @@ impl Weechat {
     ///
     /// Panics if the method is not called from the main Weechat thread.
     pub fn color_pair(foreground_color: &str, background_color: &str) -> String {
-        Weechat::color(&format!("{},{}", foreground_color, background_color)).to_string()
+        Weechat::color(&format!("{foreground_color},{background_color}")).to_string()
     }
 
     /// Retrieve a prefix value

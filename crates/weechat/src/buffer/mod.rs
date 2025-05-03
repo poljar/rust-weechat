@@ -1076,7 +1076,7 @@ impl Buffer<'_> {
     /// * `property` - The name of the property for which the value should be
     ///   fetched.
     pub fn get_localvar(&self, property: &str) -> Option<Cow<str>> {
-        self.get_string(&format!("localvar_{}", property))
+        self.get_string(&format!("localvar_{property}"))
     }
 
     /// Set the value of a buffer localvar
@@ -1087,7 +1087,7 @@ impl Buffer<'_> {
     ///
     /// * `value` - The value that the property should get.
     pub fn set_localvar(&self, property: &str, value: &str) {
-        self.set(&format!("localvar_set_{}", property), value)
+        self.set(&format!("localvar_set_{property}"), value)
     }
 
     /// Get the full name of the buffer.

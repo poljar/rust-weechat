@@ -187,7 +187,7 @@ impl<'a> BufferLine<'a> {
                 let tag = self.weechat.hdata_string(
                     self.hdata(),
                     self.line_data_pointer,
-                    &format!("{}|tags_array", i),
+                    &format!("{i}|tags_array"),
                 );
                 tags.push(tag);
             }
