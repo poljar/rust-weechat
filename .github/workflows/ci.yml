@@ -76,7 +76,8 @@ jobs:
     strategy:
       matrix:
         target: [
-          { "os": "ubuntu-latest",  "toolchain": "x86_64-unknown-linux-gnu", "name": "Linux GNU" },
+          { "os": "ubuntu-latest",  "toolchain": "x86_64-unknown-linux-gnu", "name": "Linux GNU (64-bit)" },
+          { "os": "ubuntu-latest",  "toolchain": "i686-unknown-linux-gnu",   "name": "Linux GNU (32-bit)" },
           # TODO: Add some more OS variants here.
         ]
         channel: [stable, beta, nightly]
@@ -97,22 +98,32 @@ jobs:
           sudo apt-get update
           sudo apt-get install weechat-dev
 
+      - if: ${{ matrix.target.toolchain == 'i686-unknown-linux-gnu' }}
+        run: sudo apt-get install libc6-dev-i386
+
+      - run: rustup target add ${{ matrix.target.toolchain }}
+
       - name: Install rust
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: ${{ format('{0}-{1}', matrix.channel, matrix.target.toolchain) }}
+          toolchain: ${{ matrix.channel }}
+          targets: ${{ matrix.target.toolchain }}
 
       - uses: Swatinem/rust-cache@v2
 
       - name: Test
-        run: cargo test --all-features
+        run: cargo test --all-features --target ${{ matrix.target.toolchain }}
 
   test-api:
     name: Test Weechat API
+    needs: [test]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        toolchain:
+          - x86_64-unknown-linux-gnu
+          - i686-unknown-linux-gnu
         version:
           - v3.8
           - v4.0.0
@@ -141,18 +152,24 @@ jobs:
       - run: sudo apt -y update
       - run: sudo apt -y install libclang-dev
 
+      - if: ${{ matrix.toolchain == 'i686-unknown-linux-gnu' }}
+        run: sudo apt-get install libc6-dev-i386
+
+      - run: rustup target add ${{ matrix.toolchain }}
+
       - name: Install rust
         uses: dtolnay/rust-toolchain@master
         with:
+          targets: ${{ matrix.toolchain }}
           toolchain: stable
 
       - uses: Swatinem/rust-cache@v2
 
       - name: Test
-        run: cargo test --all-features
+        run: cargo test --all-features --target ${{ matrix.toolchain }}
 
       - name: Build
-        run: cargo build --all-features
+        run: cargo build --all-features --target ${{ matrix.toolchain }}
 
       - name: Lint
-        run: cargo clippy --all-features
+        run: cargo clippy --all-features --target ${{ matrix.toolchain }}
