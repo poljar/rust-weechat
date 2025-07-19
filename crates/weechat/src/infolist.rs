@@ -97,7 +97,7 @@ impl<'a> InfolistItem<'a> {
         unsafe { infolist_integer(self.ptr, name.as_ptr()) }
     }
 
-    fn string(&self, name: &str) -> Option<Cow<str>> {
+    fn string(&self, name: &str) -> Option<Cow<'_, str>> {
         let name = LossyCString::new(name);
 
         let infolist_string = self.weechat.get().infolist_string.unwrap();
@@ -112,7 +112,7 @@ impl<'a> InfolistItem<'a> {
         }
     }
 
-    fn buffer(&self, name: &str) -> Option<Buffer> {
+    fn buffer(&self, name: &str) -> Option<Buffer<'_>> {
         let name = LossyCString::new(name);
 
         let infolist_pointer = self.weechat.get().infolist_pointer.unwrap();
@@ -150,7 +150,7 @@ impl<'a> InfolistItem<'a> {
     /// # Arguments
     ///
     /// * `key` - The name of the variable that should be fetched.
-    pub fn get(&self, key: &str) -> Option<InfolistVariable> {
+    pub fn get(&self, key: &str) -> Option<InfolistVariable<'_>> {
         let infolist_type = self.fields.get(key)?;
 
         let variable = match infolist_type {
@@ -335,7 +335,7 @@ impl Weechat {
         &self,
         infolist_name: &str,
         arguments: Option<&str>,
-    ) -> Result<Infolist, ()> {
+    ) -> Result<Infolist<'_>, ()> {
         let infolist_get = self.get().infolist_get.unwrap();
 
         let name = LossyCString::new(infolist_name);

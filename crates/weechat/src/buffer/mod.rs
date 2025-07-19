@@ -425,7 +425,7 @@ impl Weechat {
     /// * `buffer_name` - name of a buffer, if this is an empty string, the
     ///   current buffer is returned (buffer displayed by current window); if
     ///   the name starts with (?i), the search is case insensitive.
-    pub fn buffer_search(&self, plugin_name: &str, buffer_name: &str) -> Option<Buffer> {
+    pub fn buffer_search(&self, plugin_name: &str, buffer_name: &str) -> Option<Buffer<'_>> {
         let buffer_search = self.get().buffer_search.unwrap();
 
         let plugin_name = LossyCString::new(plugin_name);
@@ -440,7 +440,7 @@ impl Weechat {
         }
     }
 
-    pub(crate) fn buffer_from_ptr(&self, buffer_ptr: *mut t_gui_buffer) -> Buffer {
+    pub(crate) fn buffer_from_ptr(&self, buffer_ptr: *mut t_gui_buffer) -> Buffer<'_> {
         Buffer {
             inner: InnerBuffers::BorrowedBuffer(InnerBuffer {
                 weechat: self,
@@ -451,7 +451,7 @@ impl Weechat {
     }
 
     /// Get the currently open buffer
-    pub fn current_buffer(&self) -> Buffer {
+    pub fn current_buffer(&self) -> Buffer<'_> {
         let buffer_search = self.get().buffer_search.unwrap();
 
         let buf_ptr = unsafe { buffer_search(ptr::null(), ptr::null()) };
@@ -463,7 +463,7 @@ impl Weechat {
     }
 
     /// Get the main/core buffer.
-    pub fn core_buffer(&self) -> Buffer {
+    pub fn core_buffer(&self) -> Buffer<'_> {
         let buffer_search = self.get().buffer_search_main.unwrap();
 
         let buf_ptr = unsafe { buffer_search() };
@@ -821,7 +821,7 @@ impl Buffer<'_> {
     /// * `name` - The name of the nicklist that should be searched for.
     ///
     /// Returns a NickGroup if one is found, None otherwise.
-    pub fn search_nicklist_group(&self, name: &str) -> Option<NickGroup> {
+    pub fn search_nicklist_group(&self, name: &str) -> Option<NickGroup<'_>> {
         let weechat = self.weechat();
 
         let nicklist_search_group = weechat.get().nicklist_search_group.unwrap();
@@ -849,7 +849,7 @@ impl Buffer<'_> {
     /// * `nick` - The name of the nick that should be found.
     ///
     /// Returns a `Nick` if one is found, None otherwise.
-    pub fn search_nick(&self, nick: &str) -> Option<Nick> {
+    pub fn search_nick(&self, nick: &str) -> Option<Nick<'_>> {
         let weechat = self.weechat();
         let nick = Buffer::search_nick_helper(weechat, self.ptr(), nick, None);
 
@@ -890,7 +890,7 @@ impl Buffer<'_> {
     ///
     /// Returns the newly created nick if one is created successfully, an empty
     /// error otherwise.
-    pub fn add_nick(&self, nick_settings: NickSettings) -> Result<Nick, ()> {
+    pub fn add_nick(&self, nick_settings: NickSettings) -> Result<Nick<'_>, ()> {
         let weechat = self.weechat();
         let nick_ptr = Buffer::add_nick_helper(weechat, self.ptr(), nick_settings, None);
 
@@ -1006,7 +1006,7 @@ impl Buffer<'_> {
         color: &str,
         visible: bool,
         parent_group: Option<&NickGroup>,
-    ) -> Result<NickGroup, ()> {
+    ) -> Result<NickGroup<'_>, ()> {
         let weechat = self.weechat();
         let add_group = weechat.get().nicklist_add_group.unwrap();
 
@@ -1044,7 +1044,7 @@ impl Buffer<'_> {
         unsafe { buffer_set(self.ptr(), option.as_ptr(), value.as_ptr()) };
     }
 
-    fn get_string(&self, property: &str) -> Option<Cow<str>> {
+    fn get_string(&self, property: &str) -> Option<Cow<'_, str>> {
         let weechat = self.weechat();
 
         let buffer_get = weechat.get().buffer_get_string.unwrap();
@@ -1075,7 +1075,7 @@ impl Buffer<'_> {
     ///
     /// * `property` - The name of the property for which the value should be
     ///   fetched.
-    pub fn get_localvar(&self, property: &str) -> Option<Cow<str>> {
+    pub fn get_localvar(&self, property: &str) -> Option<Cow<'_, str>> {
         self.get_string(&format!("localvar_{property}"))
     }
 
@@ -1091,7 +1091,7 @@ impl Buffer<'_> {
     }
 
     /// Get the full name of the buffer.
-    pub fn full_name(&self) -> Cow<str> {
+    pub fn full_name(&self) -> Cow<'_, str> {
         self.get_string("full_name").unwrap()
     }
 
@@ -1105,7 +1105,7 @@ impl Buffer<'_> {
     }
 
     /// Get the name of the buffer.
-    pub fn name(&self) -> Cow<str> {
+    pub fn name(&self) -> Cow<'_, str> {
         self.get_string("name").unwrap()
     }
 
@@ -1119,7 +1119,7 @@ impl Buffer<'_> {
     }
 
     /// Get the short_name of the buffer.
-    pub fn short_name(&self) -> Cow<str> {
+    pub fn short_name(&self) -> Cow<'_, str> {
         self.get_string("short_name").unwrap()
     }
 
@@ -1133,7 +1133,7 @@ impl Buffer<'_> {
     }
 
     /// Get the plugin name of the plugin that owns this buffer.
-    pub fn plugin_name(&self) -> Cow<str> {
+    pub fn plugin_name(&self) -> Cow<'_, str> {
         self.get_string("plugin").unwrap()
     }
 
@@ -1206,7 +1206,7 @@ impl Buffer<'_> {
     }
 
     /// Get the contents of the input
-    pub fn input(&self) -> Cow<str> {
+    pub fn input(&self) -> Cow<'_, str> {
         self.get_string("input").unwrap()
     }
 
@@ -1262,7 +1262,7 @@ impl Buffer<'_> {
     }
 
     /// Get the main/core buffer
-    pub fn core_buffer(&self) -> Buffer {
+    pub fn core_buffer(&self) -> Buffer<'_> {
         self.weechat().core_buffer()
     }
 
@@ -1374,7 +1374,7 @@ impl Buffer<'_> {
     ///     Weechat::print(&format!("{:?}", line.tags()));
     /// }
     /// ```
-    pub fn lines(&self) -> BufferLines {
+    pub fn lines(&self) -> BufferLines<'_> {
         let weechat = self.weechat();
 
         let own_lines = self.own_lines();
@@ -1400,7 +1400,7 @@ impl Buffer<'_> {
     /// Get the window object that is currently displaying this buffer.
     ///
     /// Is `None` if no window is displaying this buffer.
-    pub fn window(&self) -> Option<Window> {
+    pub fn window(&self) -> Option<Window<'_>> {
         let weechat = self.weechat();
         let get_window = weechat.get().window_search_with_buffer.unwrap();
 

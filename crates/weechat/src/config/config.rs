@@ -103,7 +103,7 @@ impl Weechat {
         &self,
         pointer: *mut t_config_option,
         property: &str,
-    ) -> Option<Cow<str>> {
+    ) -> Option<Cow<'_, str>> {
         let get_string = self.get().config_option_get_string.unwrap();
         let property = LossyCString::new(property);
 
@@ -122,7 +122,7 @@ impl Weechat {
     ///
     /// * `option_name` - The full name of the option that should be searched
     ///   for (format: "file.section.option").
-    pub fn config_get(&self, option_name: &str) -> Option<ConfigOption> {
+    pub fn config_get(&self, option_name: &str) -> Option<ConfigOption<'_>> {
         let weechat = Weechat::from_ptr(self.ptr);
         let config_get = weechat.get().config_get.unwrap();
         let name = LossyCString::new(option_name);
@@ -139,7 +139,7 @@ impl Weechat {
     }
 
     /// Get value of a plugin option
-    pub fn get_plugin_option(&self, option: &str) -> Option<Cow<str>> {
+    pub fn get_plugin_option(&self, option: &str) -> Option<Cow<'_, str>> {
         let config_get_plugin = self.get().config_get_plugin.unwrap();
 
         let option_name = LossyCString::new(option);
@@ -372,7 +372,7 @@ impl Config {
     pub fn new_section(
         &mut self,
         section_settings: ConfigSectionSettings,
-    ) -> Result<SectionHandleMut, ()> {
+    ) -> Result<SectionHandleMut<'_>, ()> {
         unsafe extern "C" fn c_read_cb(
             pointer: *const c_void,
             _data: *mut c_void,
@@ -553,7 +553,7 @@ impl Config {
     /// This will panic if it is being called in a section read/write callback
     /// of the same section that is being retrieved or if the section is already
     /// mutably borrowed.
-    pub fn search_section(&self, section_name: &str) -> Option<SectionHandle> {
+    pub fn search_section(&self, section_name: &str) -> Option<SectionHandle<'_>> {
         if !self.sections.contains_key(section_name) {
             None
         } else {
@@ -574,7 +574,7 @@ impl Config {
     /// This will panic if it is being called in a section read/write callback
     /// of the same section that is being retrieved or if the section is already
     /// borrowed.
-    pub fn search_section_mut(&mut self, section_name: &str) -> Option<SectionHandleMut> {
+    pub fn search_section_mut(&mut self, section_name: &str) -> Option<SectionHandleMut<'_>> {
         if !self.sections.contains_key(section_name) {
             None
         } else {

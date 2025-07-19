@@ -24,7 +24,7 @@ impl NickGroup<'_> {
     /// * `property` - The name of the property to get the value for, this can
     ///   be one of name, color, prefix or prefix_color. If a unknown property
     ///   is requested an empty string is returned.
-    fn get_string(&self, property: &str) -> Option<Cow<str>> {
+    fn get_string(&self, property: &str) -> Option<Cow<'_, str>> {
         let weechat = self.get_weechat();
         let get_string = weechat.get().nicklist_group_get_string.unwrap();
         let c_property = LossyCString::new(property);
@@ -47,12 +47,12 @@ impl NickGroup<'_> {
     }
 
     /// Get the name of the group.
-    pub fn name(&self) -> Cow<str> {
+    pub fn name(&self) -> Cow<'_, str> {
         self.get_string("name").unwrap()
     }
 
     /// Get the color of the group.
-    pub fn color(&self) -> Cow<str> {
+    pub fn color(&self) -> Cow<'_, str> {
         self.get_string("color").unwrap()
     }
 
@@ -78,7 +78,7 @@ impl NickGroup<'_> {
     ///
     /// Returns the newly created nick if one is created successfully, an empty
     /// error otherwise.
-    pub fn add_nick(&self, nick_settings: NickSettings) -> Result<Nick, ()> {
+    pub fn add_nick(&self, nick_settings: NickSettings) -> Result<Nick<'_>, ()> {
         let weechat = self.get_weechat();
         let nick_ptr = Buffer::add_nick_helper(&weechat, self.buf_ptr, nick_settings, Some(self));
 
@@ -101,7 +101,7 @@ impl NickGroup<'_> {
     /// * `nick` - The name of the nick that should be found.
     ///
     /// Returns a `Nick` if one is found, None otherwise.
-    pub fn search_nick(&self, nick: &str) -> Option<Nick> {
+    pub fn search_nick(&self, nick: &str) -> Option<Nick<'_>> {
         let weechat = self.get_weechat();
         let nick = Buffer::search_nick_helper(&weechat, self.buf_ptr, nick, None);
 

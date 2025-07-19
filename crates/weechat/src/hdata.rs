@@ -93,7 +93,7 @@ impl Weechat {
         hdata: *mut t_hdata,
         pointer: *mut c_void,
         name: &str,
-    ) -> Cow<str> {
+    ) -> Cow<'_, str> {
         let hdata_string = self.get().hdata_string.unwrap();
         let name = LossyCString::new(name);
 

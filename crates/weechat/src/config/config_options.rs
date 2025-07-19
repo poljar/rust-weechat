@@ -53,7 +53,7 @@ pub trait HiddenConfigOptionT {
     fn get_ptr(&self) -> *mut t_config_option;
     fn get_weechat(&self) -> Weechat;
 
-    fn get_string(&self, property: &str) -> Option<Cow<str>> {
+    fn get_string(&self, property: &str) -> Option<Cow<'_, str>> {
         let weechat = self.get_weechat();
         let get_string = weechat.get().config_option_get_string.unwrap();
         let property = LossyCString::new(property);
@@ -75,22 +75,22 @@ pub trait HiddenConfigOptionT {
 /// option type.
 pub trait BaseConfigOption: HiddenConfigOptionT {
     /// Get the name of the option.
-    fn name(&self) -> Cow<str> {
+    fn name(&self) -> Cow<'_, str> {
         self.get_string("name").expect("Can't get the name of the option")
     }
 
     /// Get the description of the option.
-    fn description(&self) -> Cow<str> {
+    fn description(&self) -> Cow<'_, str> {
         self.get_string("description").expect("Can't get the description of the option")
     }
 
     /// Get the section name of the section the option belongs to.
-    fn section_name(&self) -> Cow<str> {
+    fn section_name(&self) -> Cow<'_, str> {
         self.get_string("section_name").expect("Can't get the section name of the option")
     }
 
     /// Get the config name the option belongs to.
-    fn config_name(&self) -> Cow<str> {
+    fn config_name(&self) -> Cow<'_, str> {
         self.get_string("config_name").expect("Can't get the config name of the option")
     }
 
