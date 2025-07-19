@@ -19,7 +19,7 @@ pub struct NickSettings<'a> {
 }
 
 impl<'a> NickSettings<'a> {
-    /// Create new empyt nick creation settings.
+    /// Create new empty nick creation settings.
     ///
     /// # Arguments
     ///
