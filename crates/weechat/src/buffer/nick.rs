@@ -24,7 +24,7 @@ impl<'a> NickSettings<'a> {
     /// # Arguments
     ///
     /// * `name` - The name of the new nick.
-    pub fn new(name: &str) -> NickSettings {
+    pub fn new(name: &str) -> NickSettings<'_> {
         NickSettings { name, color: "", prefix: "", prefix_color: "", visible: true }
     }
 
@@ -88,7 +88,7 @@ impl Nick<'_> {
     /// * `property` - The name of the property to get the value for, this can
     ///   be one of name, color, prefix or prefix_color. If a unknown property
     ///   is requested an empty string is returned.
-    fn get_string(&self, property: &str) -> Option<Cow<str>> {
+    fn get_string(&self, property: &str) -> Option<Cow<'_, str>> {
         let weechat = self.get_weechat();
         let get_string = weechat.get().nicklist_nick_get_string.unwrap();
         let c_property = LossyCString::new(property);
@@ -104,22 +104,22 @@ impl Nick<'_> {
     }
 
     /// Get the name property of the nick.
-    pub fn name(&self) -> Cow<str> {
+    pub fn name(&self) -> Cow<'_, str> {
         self.get_string("name").unwrap()
     }
 
     /// Get the color of the nick.
-    pub fn color(&self) -> Cow<str> {
+    pub fn color(&self) -> Cow<'_, str> {
         self.get_string("color").unwrap()
     }
 
     /// Get the prefix of the nick.
-    pub fn prefix(&self) -> Cow<str> {
+    pub fn prefix(&self) -> Cow<'_, str> {
         self.get_string("prefix").unwrap()
     }
 
     /// Get the color of the nick prefix.
-    pub fn prefix_color(&self) -> Cow<str> {
+    pub fn prefix_color(&self) -> Cow<'_, str> {
         self.get_string("prefix_color").unwrap()
     }
 }

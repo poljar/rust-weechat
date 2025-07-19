@@ -101,7 +101,7 @@ impl<'a> BufferLine<'a> {
 
     /// Get the prefix of the line, everything left of the message separator
     /// (usually `|`) is considered the prefix.
-    pub fn prefix(&self) -> Cow<str> {
+    pub fn prefix(&self) -> Cow<'_, str> {
         unsafe { self.weechat.hdata_string(self.hdata(), self.line_data_pointer, "prefix") }
     }
 
@@ -117,7 +117,7 @@ impl<'a> BufferLine<'a> {
     }
 
     /// Get the message of the line.
-    pub fn message(&self) -> Cow<str> {
+    pub fn message(&self) -> Cow<'_, str> {
         unsafe { self.weechat.hdata_string(self.hdata(), self.line_data_pointer, "message") }
     }
 
@@ -173,7 +173,7 @@ impl<'a> BufferLine<'a> {
     }
 
     /// Get the list of tags of the line.
-    pub fn tags(&self) -> Vec<Cow<str>> {
+    pub fn tags(&self) -> Vec<Cow<'_, str>> {
         unsafe {
             let count = self.weechat.hdata_var_array_size(
                 self.hdata(),

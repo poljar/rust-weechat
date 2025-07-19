@@ -90,7 +90,7 @@ pub struct ColorOption<'a> {
 
 impl ColorOption<'_> {
     /// Get the value of the option.
-    pub fn value(&self) -> Cow<str> {
+    pub fn value(&self) -> Cow<'_, str> {
         let weechat = self.get_weechat();
         let config_string = weechat.get().config_string.unwrap();
         unsafe {

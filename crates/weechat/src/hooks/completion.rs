@@ -88,21 +88,21 @@ impl Completion {
     }
 
     /// Get the command used in the completion.
-    pub fn base_command(&self) -> Option<Cow<str>> {
+    pub fn base_command(&self) -> Option<Cow<'_, str>> {
         self.get_string("base_command")
     }
 
     /// Get the word that is being completed.
-    pub fn base_word(&self) -> Option<Cow<str>> {
+    pub fn base_word(&self) -> Option<Cow<'_, str>> {
         self.get_string("base_word")
     }
 
     /// Get the command arguments including the base word.
-    pub fn arguments(&self) -> Option<Cow<str>> {
+    pub fn arguments(&self) -> Option<Cow<'_, str>> {
         self.get_string("args")
     }
 
-    fn get_string(&self, property_name: &str) -> Option<Cow<str>> {
+    fn get_string(&self, property_name: &str) -> Option<Cow<'_, str>> {
         let weechat = Weechat::from_ptr(self.weechat_ptr);
 
         let get_string = weechat.get().hook_completion_get_string.unwrap();

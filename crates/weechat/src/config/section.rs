@@ -443,7 +443,7 @@ impl ConfigSection {
     }
 
     /// Get the config options of this section.
-    pub fn options(&self) -> Vec<ConfigOption> {
+    pub fn options(&self) -> Vec<ConfigOption<'_>> {
         self.option_pointers
             .keys()
             .map(|option_name| self.search_option(option_name).unwrap())
@@ -481,7 +481,7 @@ impl ConfigSection {
     /// # Arguments
     ///
     /// * `option_name` - The name of the option to search for.
-    pub fn search_option(&self, option_name: &str) -> Option<ConfigOption> {
+    pub fn search_option(&self, option_name: &str) -> Option<ConfigOption<'_>> {
         let weechat = Weechat::from_ptr(self.weechat_ptr);
         let config_search_option = weechat.get().config_search_option.unwrap();
         let name = LossyCString::new(option_name);
@@ -508,7 +508,7 @@ impl ConfigSection {
     pub fn new_string_option(
         &mut self,
         settings: StringOptionSettings,
-    ) -> Result<StringOption, ()> {
+    ) -> Result<StringOption<'_>, ()> {
         let ret = self.new_option(
             OptionDescription {
                 name: &settings.name,
@@ -546,7 +546,7 @@ impl ConfigSection {
     pub fn new_boolean_option(
         &mut self,
         settings: BooleanOptionSettings,
-    ) -> Result<BooleanOption, ()> {
+    ) -> Result<BooleanOption<'_>, ()> {
         let value = if settings.default_value { "on" } else { "off" };
         let default_value = if settings.default_value { "on" } else { "off" };
         let ret = self.new_option(
@@ -587,7 +587,7 @@ impl ConfigSection {
     pub fn new_integer_option(
         &mut self,
         settings: IntegerOptionSettings,
-    ) -> Result<IntegerOption, ()> {
+    ) -> Result<IntegerOption<'_>, ()> {
         let ret = self.new_option(
             OptionDescription {
                 name: &settings.name,
@@ -624,7 +624,10 @@ impl ConfigSection {
     ///
     /// # Arguments
     /// * `settings` - Settings that decide how the option should be created.
-    pub fn new_color_option(&mut self, settings: ColorOptionSettings) -> Result<ColorOption, ()> {
+    pub fn new_color_option(
+        &mut self,
+        settings: ColorOptionSettings,
+    ) -> Result<ColorOption<'_>, ()> {
         let ret = self.new_option(
             OptionDescription {
                 name: &settings.name,
@@ -660,7 +663,7 @@ impl ConfigSection {
     /// # Arguments
     /// * `settings` - Settings that decide how the option should be created.
     #[cfg(not(weechat410))]
-    pub fn new_enum_option(&mut self, settings: EnumOptionSettings) -> Result<EnumOption, ()> {
+    pub fn new_enum_option(&mut self, settings: EnumOptionSettings) -> Result<EnumOption<'_>, ()> {
         let ret = self.new_option(
             OptionDescription {
                 name: &settings.name,
