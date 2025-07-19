@@ -133,6 +133,7 @@ jobs:
           - v4.4.0
           - v4.5.0
           - v4.6.0
+          - v4.7.0
     env:
       WEECHAT_BUNDLED: 'no'
       WEECHAT_PLUGIN_FILE: '${{ github.workspace }}/weechat-src/src/plugins/weechat-plugin.h'
