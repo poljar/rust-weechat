@@ -95,7 +95,7 @@ impl PartialEq for Buffer<'_> {
 
 impl PartialOrd for Buffer<'_> {
     fn partial_cmp(&self, other: &Buffer) -> Option<Ordering> {
-        Some(self.number().cmp(&other.number()))
+        Some(self.cmp(other))
     }
 }
 
