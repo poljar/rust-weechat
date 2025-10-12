@@ -50,26 +50,28 @@ fn main() {
 
     let plugin_file = env::var(WEECHAT_PLUGIN_FILE_ENV);
 
-    let bindings = if bundled {
-        println!("cargo::warning=Using vendored header");
-        build("src/weechat-plugin.h").expect("Unable to generate bindings")
-    } else {
-        match plugin_file {
-            Ok(file) => {
-                let path = PathBuf::from(file).canonicalize().expect("Can't canonicalize path");
-                println!("cargo::warning=Using system header");
-                build(path.to_str().unwrap_or_default()).unwrap_or_else(|_| {
-                    panic!("Unable to generate bindings with the provided {:?}", path)
-                })
-            }
-            Err(_) => {
-                println!("cargo::warning=Using system header via wrapper.h");
-                let bindings = build("src/wrapper.h");
+    let bindings = plugin_file
+        .map(|file| {
+            let path = PathBuf::from(file);
+            path.canonicalize().unwrap_or(path)
+        })
+        .map(|path| {
+            println!("cargo::warning=Using system header with path: {path:?}");
+            build(path.to_str().unwrap_or_default())
+        })
+        .unwrap_or_else(|_| {
+            println!("cargo::warning=Using system header via wrapper.h");
+            build("src/wrapper.h")
+        });
 
-                match bindings {
-                    Ok(b) => b,
-                    Err(_) => build("src/weechat-plugin.h").expect("Unable to generate bindings"),
-                }
+    let bindings = match bindings {
+        Ok(b) => b,
+        Err(err) => {
+            if std::env::var("CARGO_FEATURE_VENDOR").is_ok() || bundled {
+                println!("cargo::warning=Using vendored header");
+                build("src/weechat-plugin.h").expect("Unable to generate bindings")
+            } else {
+                panic!("\n!!!!!\nUnable to build weechat-plugin bindings and vendored bindings are not enabled: {err}!!!!!\n");
             }
         }
     };

@@ -81,38 +81,49 @@ jobs:
           # TODO: Add some more OS variants here.
         ]
         channel: [stable, beta, nightly]
+        features: [all, default, none]
+        install-header: [true, false]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Install WeeChat
-        if: runner.os == 'Linux'
-        run: |
-          sudo mkdir /root/.gnupg
-          sudo chmod 700 /root/.gnupg
-          sudo mkdir -p /usr/share/keyrings
-          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/weechat-archive-keyring.gpg --keyserver hkps://keys.openpgp.org --recv-keys 11E9DE8848F2B65222AA75B8D1820DB22A11534E
-          echo "deb [signed-by=/usr/share/keyrings/weechat-archive-keyring.gpg] https://weechat.org/ubuntu jammy main" | sudo tee /etc/apt/sources.list.d/weechat.list
-          echo "deb-src [signed-by=/usr/share/keyrings/weechat-archive-keyring.gpg] https://weechat.org/ubuntu jammy main" | sudo tee -a /etc/apt/sources.list.d/weechat.list
-          sudo apt-get update
-          sudo apt-get install weechat-dev
+    - name: Install WeeChat
+      if: runner.os == 'Linux' && matrix.install-header == true
+      run: |
+        sudo mkdir /root/.gnupg
+        sudo chmod 700 /root/.gnupg
+        sudo mkdir -p /usr/share/keyrings
+        sudo gpg --no-default-keyring --keyring /usr/share/keyrings/weechat-archive-keyring.gpg --keyserver hkps://keys.openpgp.org --recv-keys 11E9DE8848F2B65222AA75B8D1820DB22A11534E
+        echo "deb [signed-by=/usr/share/keyrings/weechat-archive-keyring.gpg] https://weechat.org/ubuntu jammy main" | sudo tee /etc/apt/sources.list.d/weechat.list
+        echo "deb-src [signed-by=/usr/share/keyrings/weechat-archive-keyring.gpg] https://weechat.org/ubuntu jammy main" | sudo tee -a /etc/apt/sources.list.d/weechat.list
+        sudo apt-get update
+        sudo apt-get install weechat-dev
 
-      - if: ${{ matrix.target.toolchain == 'i686-unknown-linux-gnu' }}
-        run: sudo apt-get install libc6-dev-i386
+    - if: ${{ matrix.target.toolchain == 'i686-unknown-linux-gnu' }}
+      run: sudo apt-get install libc6-dev-i386
 
-      - run: rustup target add ${{ matrix.target.toolchain }}
+    - run: rustup target add ${{ matrix.target.toolchain }}
 
-      - name: Install rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ matrix.channel }}
-          targets: ${{ matrix.target.toolchain }}
+    - name: Install rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.channel }}
+        targets: ${{ matrix.target.toolchain }}
 
-      - uses: Swatinem/rust-cache@v2
+    - uses: Swatinem/rust-cache@v2
 
-      - name: Test
-        run: cargo test --all-features --target ${{ matrix.target.toolchain }}
+    - name: Test all features
+      if: matrix.features == 'all'
+      run: cargo test --target ${{ matrix.target.toolchain }} --all-features
+      
+    - name: Test default features
+      if: matrix.features == 'default'
+      run: cargo test --target ${{ matrix.target.toolchain }}
+
+    - name: Test no features
+      if: matrix.features == 'none'
+      run: cargo test --target ${{ matrix.target.toolchain }} --no-default-features
 
   test-api:
     name: Test Weechat API
@@ -135,42 +146,42 @@ jobs:
           - v4.6.0
           - v4.7.0
     env:
-      WEECHAT_BUNDLED: 'no'
-      WEECHAT_PLUGIN_FILE: '${{ github.workspace }}/weechat-src/src/plugins/weechat-plugin.h'
+      WEECHAT_BUNDLED: "no"
+      WEECHAT_PLUGIN_FILE: "${{ github.workspace }}/weechat-src/src/plugins/weechat-plugin.h"
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Checkout weechat API header
-        uses: actions/checkout@v4
-        with:
-          repository: 'weechat/weechat'
-          ref: ${{ matrix.version }}
-          path: 'weechat-src'
-          sparse-checkout: src/plugins/weechat-plugin.h
-          sparse-checkout-cone-mode: false
+    - name: Checkout weechat API header
+      uses: actions/checkout@v4
+      with:
+        repository: "weechat/weechat"
+        ref: ${{ matrix.version }}
+        path: "weechat-src"
+        sparse-checkout: src/plugins/weechat-plugin.h
+        sparse-checkout-cone-mode: false
 
-      - run: sudo apt -y update
-      - run: sudo apt -y install libclang-dev
+    - run: sudo apt -y update
+    - run: sudo apt -y install libclang-dev
 
-      - if: ${{ matrix.toolchain == 'i686-unknown-linux-gnu' }}
-        run: sudo apt-get install libc6-dev-i386
+    - if: ${{ matrix.toolchain == 'i686-unknown-linux-gnu' }}
+      run: sudo apt-get install libc6-dev-i386
 
-      - run: rustup target add ${{ matrix.toolchain }}
+    - run: rustup target add ${{ matrix.toolchain }}
 
-      - name: Install rust
-        uses: dtolnay/rust-toolchain@master
-        with:
-          targets: ${{ matrix.toolchain }}
-          toolchain: stable
+    - name: Install rust
+      uses: dtolnay/rust-toolchain@master
+      with:
+        targets: ${{ matrix.toolchain }}
+        toolchain: stable
 
-      - uses: Swatinem/rust-cache@v2
+    - uses: Swatinem/rust-cache@v2
 
-      - name: Test
-        run: cargo test --all-features --target ${{ matrix.toolchain }}
+    - name: Test
+      run: cargo test --all-features --target ${{ matrix.toolchain }}
 
-      - name: Build
-        run: cargo build --all-features --target ${{ matrix.toolchain }}
+    - name: Build
+      run: cargo build --all-features --target ${{ matrix.toolchain }}
 
-      - name: Lint
-        run: cargo clippy --all-features --target ${{ matrix.toolchain }}
+    - name: Lint
+      run: cargo clippy --all-features --target ${{ matrix.toolchain }}

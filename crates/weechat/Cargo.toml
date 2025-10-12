@@ -16,6 +16,8 @@ features = ["docs"]
 rustdoc-args = ["--cfg", "feature=\"docs\""]
 
 [features]
+default = ["vendor"]
+
 # Support to run futures on the Weechat main thread.
 async = ["async-task", "pipe-channel", "futures", "async-trait"]
 
@@ -24,6 +26,9 @@ config_macro = ["paste", "strum"]
 
 # Still unsound or experimental features will be hidden behind this flag.
 unsound = []
+
+# Include weechat-plugin.h vendored copy as a fallback
+vendor = ["weechat-sys/vendor"]
 
 docs = ["async", "unsound", "config_macro"]
 
@@ -39,7 +44,7 @@ paste = { version = "1.0.9", optional = true }
 strum = { version = "0.27.2", optional = true }
 
 weechat-macro = { version = "0.4.0", path = "../weechat-macro" }
-weechat-sys = { version = "0.4.0", path = "../weechat-sys" }
+weechat-sys = { version = "0.4.0", path = "../weechat-sys", default-features = false }
 
 [dev-dependencies]
 async-std = "1.12.0"
@@ -49,4 +54,4 @@ strum_macros = "0.27.2"
 futures = "0.3.24"
 
 [build-dependencies]
-weechat-sys = { version = "0.4.0", path = "../weechat-sys" }
+weechat-sys = { version = "0.4.0", path = "../weechat-sys", default-features = false }
