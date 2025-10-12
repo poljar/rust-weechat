@@ -80,7 +80,7 @@ jobs:
           { "os": "ubuntu-latest",  "toolchain": "i686-unknown-linux-gnu",   "name": "Linux GNU (32-bit)" },
           # TODO: Add some more OS variants here.
         ]
-        channel: [stable, beta, nightly]
+        channel: [stable, nightly]
         features: [all, default, none]
         install-header: [true, false]
 
