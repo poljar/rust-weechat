@@ -25,7 +25,8 @@ fn build(file: &str) -> Result<Bindings, BindgenError> {
         "WEECHAT_HOOK_SIGNAL_INT",
         "WEECHAT_HOOK_SIGNAL_POINTER",
     ];
-    let mut builder = bindgen::Builder::default();
+    let mut builder =
+        bindgen::Builder::default().parse_callbacks(Box::new(bindgen::CargoCallbacks::new()));
 
     builder = builder.header(file);
 
