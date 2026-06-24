@@ -595,6 +595,8 @@ impl ConfigSection {
                 description: &settings.description,
                 min: settings.min,
                 max: settings.max,
+                #[cfg(weechat410)]
+                string_values: &settings.string_values,
                 default_value: &settings.default_value.to_string(),
                 value: &settings.default_value.to_string(),
                 ..Default::default()
