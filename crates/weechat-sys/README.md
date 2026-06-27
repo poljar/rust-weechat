@@ -16,5 +16,8 @@ A custom include file can be set with the `WEECHAT_PLUGIN_FILE` environment
 variable, this environment variable takes a full path to the custom include
 file.
 
+Cargo will rebuild the bindings when these environment variables change or when
+bindgen sees one of the selected header files change.
+
 [Weechat]: weechat.org/
 [API]: https://weechat.org/files/doc/stable/weechat_plugin_api.en.html
