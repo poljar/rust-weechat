@@ -83,7 +83,7 @@ impl Parse for WeechatPluginInfo {
         input.parse::<syn::Token![,]>()?;
 
         let args: Punctuated<WeechatVariable, syn::Token![,]> =
-            input.parse_terminated(WeechatVariable::parse)?;
+            input.parse_terminated(WeechatVariable::parse, syn::Token![,])?;
         let mut variables = HashMap::new();
 
         for arg in args.pairs() {

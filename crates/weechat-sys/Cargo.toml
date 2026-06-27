@@ -3,10 +3,14 @@ name = "weechat-sys"
 version = "0.4.0"
 authors = ["Damir Jelić <poljar@termina.org.uk>"]
 description = "Rust low level API bindings for Weechat"
-edition = "2018"
+edition = "2021"
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/poljar/rust-weechat"
+
+[features]
+default = []
+vendor = []
 
 [build-dependencies]
 bindgen = "0.70.0"

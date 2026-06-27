@@ -1,7 +1,7 @@
 /*
  * weechat-plugin.h - header to compile WeeChat plugins
  *
- * Copyright (C) 2003-2024 Sébastien Helleu <flashcode@flashtux.org>
+ * Copyright (C) 2003-2025 Sébastien Helleu <flashcode@flashtux.org>
  *
  * This file is part of WeeChat, the extensible chat client.
  *
@@ -74,7 +74,7 @@ struct t_weelist_item;
  * please change the date with current one; for a second change at same
  * date, increment the 01, otherwise please keep 01.
  */
-#define WEECHAT_PLUGIN_API_VERSION "20240727-01"
+#define WEECHAT_PLUGIN_API_VERSION "20250215-01"
 
 /* macros for defining plugin infos */
 #define WEECHAT_PLUGIN_NAME(__name)                                     \
@@ -307,6 +307,8 @@ struct t_weechat_plugin
     int upgrading;                     /* 1 if the plugin must load upgrade */
                                        /* info on startup (if weechat is    */
                                        /* run with --upgrade)               */
+    int unload_with_upgrade;           /* 1 if the plugin is unloaded after */
+                                       /* /upgrade command                  */
     struct t_hashtable *variables;     /* plugin custom variables           */
     struct t_weechat_plugin *prev_plugin; /* link to previous plugin        */
     struct t_weechat_plugin *next_plugin; /* link to next plugin            */
@@ -465,7 +467,7 @@ struct t_weechat_plugin
     int (*util_version_number) (const char *version);
 
     /* sorted lists */
-    struct t_weelist *(*list_new) ();
+    struct t_weelist *(*list_new) (void);
     struct t_weelist_item *(*list_add) (struct t_weelist *weelist,
                                         const char *data,
                                         const char *where,
@@ -996,7 +998,7 @@ struct t_weechat_plugin
                                               const void *close_callback_pointer,
                                               void *close_callback_data);
     struct t_gui_buffer *(*buffer_search) (const char *plugin, const char *name);
-    struct t_gui_buffer *(*buffer_search_main) ();
+    struct t_gui_buffer *(*buffer_search_main) (void);
     void (*buffer_clear) (struct t_gui_buffer *buffer);
     void (*buffer_close) (struct t_gui_buffer *buffer);
     void (*buffer_merge) (struct t_gui_buffer *buffer,
@@ -1131,6 +1133,8 @@ struct t_weechat_plugin
                               const char *data, int position, int direction);
     const char *(*completion_get_string) (struct t_gui_completion *completion,
                                           const char *property);
+    void (*completion_set) (struct t_gui_completion *completion,
+                            const char *property, const char *value);
     void (*completion_list_add) (struct t_gui_completion *completion,
                                  const char *word,
                                  int nick_completion,
@@ -2202,6 +2206,8 @@ extern int weechat_plugin_end (struct t_weechat_plugin *plugin);
                                         __position, __direction)
 #define weechat_completion_get_string(__completion, __property)         \
     (weechat_plugin->completion_get_string)(__completion, __property)
+#define weechat_completion_set(__completion, __property, __value)       \
+    (weechat_plugin->completion_set)(__completion, __property, __value)
 #define weechat_completion_list_add(__completion, __word,               \
                                     __nick_completion, __where)         \
     (weechat_plugin->completion_list_add)(__completion, __word,         \
