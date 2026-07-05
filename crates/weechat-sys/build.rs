@@ -65,12 +65,12 @@ fn main() {
             }
             Err(_) => {
                 println!("cargo::warning=Using system header via wrapper.h");
-                let bindings = build("src/wrapper.h");
-
-                match bindings {
-                    Ok(b) => b,
-                    Err(_) => build("src/weechat-plugin.h").expect("Unable to generate bindings"),
-                }
+                build("src/wrapper.h").expect(
+                    "Unable to generate bindings with the system weechat-plugin.h. \
+                     Install the WeeChat development headers, set WEECHAT_PLUGIN_FILE \
+                     to the full path of weechat-plugin.h, or set WEECHAT_BUNDLED=true \
+                     to explicitly use the bundled header.",
+                )
             }
         }
     };
