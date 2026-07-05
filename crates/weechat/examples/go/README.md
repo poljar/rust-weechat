@@ -22,10 +22,11 @@ By default this will install the plugin in your `$HOME/.weechat/plugins` directo
 
 ### Picking the correct Weechat version.
 
-By default the system-wide `weechat-plugin.h` file will be used if found,
-this behaviour can be overridden with two environment flags.
+By default the system-wide `weechat-plugin.h` file will be used. The build
+fails if it cannot be found; this behaviour can be overridden with two
+environment flags.
 
-To prefer a bundled include file `WEECHAT_BUNDLED` should be set to `true`. The
+To use a bundled include file `WEECHAT_BUNDLED` should be set to `true`. The
 bundled include file tracks the latest Weechat release.
 
 A custom include file can be set with the `WEECHAT_PLUGIN_FILE` environment
