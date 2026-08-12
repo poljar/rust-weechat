@@ -1,12 +1,12 @@
 use std::{
     collections::VecDeque,
+    io::{PipeReader, PipeWriter, Read, Write},
     panic,
     sync::{Arc, Mutex},
 };
 
 pub use async_task::{Runnable, Task};
 use futures::future::{BoxFuture, Future};
-use pipe_channel::{channel, Receiver, Sender};
 
 use crate::{
     hooks::{FdHook, FdHookCallback, FdHookMode},
@@ -43,17 +43,21 @@ type FutureQueue = Arc<Mutex<VecDeque<ExecutorJob>>>;
 
 #[derive(Clone)]
 pub struct WeechatExecutor {
-    _hook: Arc<Mutex<Option<FdHook<Receiver<()>>>>>,
-    sender: Arc<Mutex<Sender<()>>>,
+    _hook: Arc<Mutex<Option<FdHook<PipeReader>>>>,
+    sender: Arc<Mutex<PipeWriter>>,
     futures: FutureQueue,
     non_local_futures: Arc<Mutex<VecDeque<BoxFuture<'static, ()>>>>,
 }
 
 impl FdHookCallback for WeechatExecutor {
-    type FdObject = Receiver<()>;
+    type FdObject = PipeReader;
 
-    fn callback(&mut self, _weechat: &Weechat, receiver: &mut Receiver<()>) {
-        if receiver.recv().is_err() {
+    fn callback(&mut self, _weechat: &Weechat, receiver: &mut PipeReader) {
+        // Consume exactly one wakeup byte; Weechat only calls us once the
+        // read end is ready, so this does not block.
+        let mut wakeup = [0u8; 1];
+
+        if receiver.read_exact(&mut wakeup).is_err() {
             return;
         }
 
@@ -90,7 +94,8 @@ impl FdHookCallback for WeechatExecutor {
 
 impl WeechatExecutor {
     fn new() -> Self {
-        let (sender, receiver) = channel();
+        let (receiver, sender) =
+            std::io::pipe().expect("Can't create the executor notification pipe");
         let sender = Arc::new(Mutex::new(sender));
         let queue = Arc::new(Mutex::new(VecDeque::new()));
         let non_local = Arc::new(Mutex::new(VecDeque::new()));
@@ -132,7 +137,7 @@ impl WeechatExecutor {
                     q.lock().expect("Lock of the future queue of the Weechat executor is poisoned");
 
                 queue.push_back(ExecutorJob::Job(runnable));
-                weechat_notify.send(()).expect("Can't notify Weechat to run a future");
+                weechat_notify.write_all(&[0]).expect("Can't notify Weechat to run a future");
             }
         };
 
@@ -173,7 +178,7 @@ impl WeechatExecutor {
             .sender
             .lock()
             .unwrap()
-            .send(())
+            .write_all(&[0])
             .expect("Can't notify Weechat to spawn a non-local future");
     }
 
@@ -212,7 +217,7 @@ impl WeechatExecutor {
                     q.lock().expect("Lock of the future queue of the Weechat executor is poisoned");
 
                 queue.push_back(ExecutorJob::BufferJob(BufferJob(runnable, buffer_name.clone())));
-                weechat_notify.send(()).expect("Can't notify Weechat to run a future");
+                weechat_notify.write_all(&[0]).expect("Can't notify Weechat to run a future");
             }
         };
 
