@@ -1,17 +1,55 @@
 use std::{
     collections::VecDeque,
+    io::{Read, Result, Write},
+    os::unix::io::{AsRawFd, RawFd},
     panic,
     sync::{Arc, Mutex},
 };
 
 pub use async_task::{Runnable, Task};
 use futures::future::{BoxFuture, Future};
-use pipe_channel::{channel, Receiver, Sender};
+use os_pipe::{PipeReader, PipeWriter};
 
 use crate::{
     hooks::{FdHook, FdHookCallback, FdHookMode},
     Weechat,
 };
+
+// These are `pub` rather than `pub(crate)` only because `FdHookCallback` is a
+// public trait, so the compiler wants its associated types to also be
+// `pub`, but since the `executor` module is private, these types aren't
+// actually accessible via the public API.
+
+/// Create a pipe whose receiving half can be watched by an [`FdHook`], letting
+/// other threads wake up the Weechat main thread.
+pub fn pipe() -> Result<(Sender, Receiver)> {
+    let (reader, writer) = os_pipe::pipe()?;
+
+    Ok((Sender(writer), Receiver(reader)))
+}
+
+pub struct Sender(PipeWriter);
+
+impl Sender {
+    fn send(&mut self) -> Result<()> {
+        self.0.write_all(&[0])
+    }
+}
+
+pub struct Receiver(PipeReader);
+
+impl Receiver {
+    fn recv(&mut self) -> Result<()> {
+        let mut byte = [0];
+        self.0.read_exact(&mut byte)
+    }
+}
+
+impl AsRawFd for Receiver {
+    fn as_raw_fd(&self) -> RawFd {
+        self.0.as_raw_fd()
+    }
+}
 
 static mut _EXECUTOR: Option<WeechatExecutor> = None;
 
@@ -43,16 +81,16 @@ type FutureQueue = Arc<Mutex<VecDeque<ExecutorJob>>>;
 
 #[derive(Clone)]
 pub struct WeechatExecutor {
-    _hook: Arc<Mutex<Option<FdHook<Receiver<()>>>>>,
-    sender: Arc<Mutex<Sender<()>>>,
+    _hook: Arc<Mutex<Option<FdHook<Receiver>>>>,
+    sender: Arc<Mutex<Sender>>,
     futures: FutureQueue,
     non_local_futures: Arc<Mutex<VecDeque<BoxFuture<'static, ()>>>>,
 }
 
 impl FdHookCallback for WeechatExecutor {
-    type FdObject = Receiver<()>;
+    type FdObject = Receiver;
 
-    fn callback(&mut self, _weechat: &Weechat, receiver: &mut Receiver<()>) {
+    fn callback(&mut self, _weechat: &Weechat, receiver: &mut Receiver) {
         if receiver.recv().is_err() {
             return;
         }
@@ -90,7 +128,7 @@ impl FdHookCallback for WeechatExecutor {
 
 impl WeechatExecutor {
     fn new() -> Self {
-        let (sender, receiver) = channel();
+        let (sender, receiver) = pipe().expect("Can't create executor wakeup pipe");
         let sender = Arc::new(Mutex::new(sender));
         let queue = Arc::new(Mutex::new(VecDeque::new()));
         let non_local = Arc::new(Mutex::new(VecDeque::new()));
@@ -132,7 +170,7 @@ impl WeechatExecutor {
                     q.lock().expect("Lock of the future queue of the Weechat executor is poisoned");
 
                 queue.push_back(ExecutorJob::Job(runnable));
-                weechat_notify.send(()).expect("Can't notify Weechat to run a future");
+                weechat_notify.send().expect("Can't notify Weechat to run a future");
             }
         };
 
@@ -173,7 +211,7 @@ impl WeechatExecutor {
             .sender
             .lock()
             .unwrap()
-            .send(())
+            .send()
             .expect("Can't notify Weechat to spawn a non-local future");
     }
 
@@ -212,7 +250,7 @@ impl WeechatExecutor {
                     q.lock().expect("Lock of the future queue of the Weechat executor is poisoned");
 
                 queue.push_back(ExecutorJob::BufferJob(BufferJob(runnable, buffer_name.clone())));
-                weechat_notify.send(()).expect("Can't notify Weechat to run a future");
+                weechat_notify.send().expect("Can't notify Weechat to run a future");
             }
         };
 

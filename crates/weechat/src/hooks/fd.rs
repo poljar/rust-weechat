@@ -90,24 +90,27 @@ impl<F> FdHook<F> {
     /// # Example
     ///
     /// ```no_run
+    /// # use std::io::Read;
     /// # use weechat::{Weechat, hooks::{FdHook, FdHookMode, FdHookCallback}};
-    /// # use pipe_channel::{channel, Receiver, Sender};
+    /// # use os_pipe::PipeReader;
     ///
     /// struct Data;
     ///
     /// impl FdHookCallback for Data {
-    ///     type FdObject = Receiver<String>;
+    ///     type FdObject = PipeReader;
     ///
-    ///     fn callback(&mut self, _: &Weechat, receiver: &mut Receiver<String>) {
-    ///         if let Ok(data) = receiver.recv() {
+    ///     fn callback(&mut self, _: &Weechat, reader: &mut PipeReader) {
+    ///         let mut data = String::new();
+    ///
+    ///         if reader.read_to_string(&mut data).is_ok() {
     ///             Weechat::print(&data)
     ///         }
     ///     }
     /// }
     ///
-    /// let (sender, receiver): (Sender<String>, Receiver<String>) = channel();
+    /// let (reader, writer) = os_pipe::pipe().expect("Can't create pipe");
     ///
-    /// let hook = FdHook::new(receiver, FdHookMode::Read, Data)
+    /// let hook = FdHook::new(reader, FdHookMode::Read, Data)
     ///     .expect("Can't create executor FD hook");
     /// ```
     pub fn new(
