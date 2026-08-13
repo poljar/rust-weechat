@@ -52,7 +52,7 @@ mod weechat;
 mod config_macros;
 
 #[cfg(feature = "config_macro")]
-pub use paste;
+pub use pastey as paste;
 #[cfg(feature = "config_macro")]
 pub use strum;
 

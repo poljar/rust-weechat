@@ -20,7 +20,7 @@ rustdoc-args = ["--cfg", "feature=\"docs\""]
 async = ["async-task", "os_pipe", "futures", "async-trait"]
 
 # Declarative configuration macro.
-config_macro = ["paste", "strum"]
+config_macro = ["pastey", "strum"]
 
 # Still unsound or experimental features will be hidden behind this flag.
 unsound = []
@@ -35,7 +35,7 @@ async-task = { version = "4.3.0", optional = true }
 async-trait = { version = "0.1.57", optional = true }
 os_pipe = { version = "1.2.3", optional = true }
 futures = { version = "0.3.24", optional = true }
-paste = { version = "1.0.9", optional = true }
+pastey = { version = "0.2.3", optional = true }
 strum = { version = "0.24.1", optional = true }
 
 weechat-macro = { version = "0.4.0", path = "../weechat-macro" }
