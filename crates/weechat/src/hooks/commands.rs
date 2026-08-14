@@ -288,13 +288,13 @@ impl Command {
             buffer: *mut t_gui_buffer,
             argc: i32,
             argv: *mut *mut c_char,
-            _argv_eol: *mut *mut c_char,
+            argv_eol: *mut *mut c_char,
         ) -> c_int {
             let hook_data: &mut CommandHookData = { &mut *(pointer as *mut CommandHookData) };
             let weechat = Weechat::from_ptr(hook_data.weechat_ptr);
             let buffer = weechat.buffer_from_ptr(buffer);
             let cb = &mut hook_data.callback;
-            let args = Args::new(argc, argv);
+            let args = Args::new(argc, argv, argv_eol);
 
             cb.callback(&weechat, &buffer, args);
 
