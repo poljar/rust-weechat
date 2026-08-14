@@ -36,7 +36,7 @@ async-trait = { version = "0.1.57", optional = true }
 os_pipe = { version = "1.2.3", optional = true }
 futures = { version = "0.3.24", optional = true }
 pastey = { version = "0.2.3", optional = true }
-strum = { version = "0.24.1", optional = true }
+strum = { version = "0.28.0", optional = true }
 
 weechat-macro = { version = "0.4.0", path = "../weechat-macro" }
 weechat-sys = { version = "0.4.0", path = "../weechat-sys" }
@@ -44,8 +44,8 @@ weechat-sys = { version = "0.4.0", path = "../weechat-sys" }
 [dev-dependencies]
 async-channel = "2.5.0"
 os_pipe = "1.2.3"
-strum = "0.24.1"
-strum_macros = "0.24.3"
+strum = "0.28.0"
+strum_macros = "0.28.0"
 futures = "0.3.24"
 
 [build-dependencies]
