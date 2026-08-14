@@ -37,6 +37,19 @@ jobs:
     - name: Check the spelling of the files in our repo
       uses: crate-ci/typos@master
 
+  deny:
+    name: Check dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repo
+      uses: actions/checkout@v4
+
+    - name: Cargo deny
+      uses: EmbarkStudios/cargo-deny-action@v2
+      with:
+        command: check
+
   clippy:
     name: Run clippy
     needs: [style]

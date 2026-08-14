@@ -1,0 +1,27 @@
+[graph]
+all-features = true
+
+[licenses]
+# Unicode-3.0 is required by unicode-ident, whose expression ANDs it with the
+# usual MIT/Apache choice rather than offering it as an alternative.
+allow = [
+    "0BSD",
+    "Apache-2.0",
+    "BSD-3-Clause",
+    "ISC",
+    "MIT",
+    "Unicode-3.0",
+    "Unlicense",
+    "Zlib",
+]
+
+[bans]
+multiple-versions = "warn"
+skip = [{ crate = "syn:2", reason = "transitive dependency of bindgen" }]
+
+[advisories]
+ignore = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
