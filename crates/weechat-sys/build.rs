@@ -1,4 +1,4 @@
-use std::{env, path::PathBuf};
+use std::{env, fs, path::PathBuf};
 
 use bindgen::{BindgenError, Bindings};
 
@@ -41,6 +41,29 @@ fn build(file: &str) -> Result<Bindings, BindgenError> {
     builder.generate()
 }
 
+fn header_api_version(file: &str) -> Option<String> {
+    let contents = fs::read_to_string(file).ok()?;
+    contents.lines().find_map(|line| {
+        let line = line.trim();
+        let version = line.strip_prefix("#define WEECHAT_PLUGIN_API_VERSION ")?;
+        Some(version.trim_matches('"').to_string())
+    })
+}
+
+fn report_header(label: &str, file: &str) {
+    let path = PathBuf::from(file).canonicalize().unwrap_or_else(|_| PathBuf::from(file));
+    match header_api_version(path.to_str().unwrap_or(file)) {
+        Some(version) => println!(
+            "cargo::warning=Using {label} WeeChat header: {} (API {version})",
+            path.display()
+        ),
+        None => println!(
+            "cargo::warning=Using {label} WeeChat header: {} (API version unknown)",
+            path.display()
+        ),
+    }
+}
+
 fn main() {
     let bundled =
         env::var(WEECHAT_BUNDLED_ENV).is_ok_and(|bundled| match bundled.to_lowercase().as_ref() {
@@ -52,19 +75,19 @@ fn main() {
     let plugin_file = env::var(WEECHAT_PLUGIN_FILE_ENV);
 
     let bindings = if bundled {
-        println!("cargo::warning=Using vendored header");
+        report_header("vendored", "src/weechat-plugin.h");
         build("src/weechat-plugin.h").expect("Unable to generate bindings")
     } else {
         match plugin_file {
             Ok(file) => {
                 let path = PathBuf::from(file).canonicalize().expect("Can't canonicalize path");
-                println!("cargo::warning=Using system header");
+                report_header("configured", path.to_str().unwrap_or_default());
                 build(path.to_str().unwrap_or_default()).unwrap_or_else(|_| {
                     panic!("Unable to generate bindings with the provided {:?}", path)
                 })
             }
             Err(_) => {
-                println!("cargo::warning=Using system header via wrapper.h");
+                report_header("system", "src/wrapper.h");
                 build("src/wrapper.h").expect(
                     "Unable to generate bindings with the system weechat-plugin.h. \
                      Install the WeeChat development headers, set WEECHAT_PLUGIN_FILE \
