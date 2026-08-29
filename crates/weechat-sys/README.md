@@ -19,5 +19,8 @@ file.
 Cargo will rebuild the bindings when these environment variables change or when
 bindgen sees one of the selected header files change.
 
+The build output reports the selected header path and, when the header exposes
+it directly, its `WEECHAT_PLUGIN_API_VERSION`.
+
 [Weechat]: weechat.org/
 [API]: https://weechat.org/files/doc/stable/weechat_plugin_api.en.html
