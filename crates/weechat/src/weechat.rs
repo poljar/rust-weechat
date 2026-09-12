@@ -23,6 +23,7 @@ use crate::LossyCString;
 /// for each argument.
 pub struct Args {
     iter: vec::IntoIter<String>,
+    eol: Vec<String>,
 }
 
 /// A Weechat prefix, can be prepended to a message to notify the message
@@ -57,22 +58,39 @@ impl Args {
     /// Expects the strings in argv to be valid utf8, if not invalid UTF-8
     /// sequences are replaced with the replacement character.
     ///
+    /// `argv_eol` may be null, in which case [`Args::rest`] always returns
+    /// `None`.
+    ///
     /// # Safety
     ///
-    /// This should never be called by the user, this is called internally but
+    /// This should never be called by the user. This is called internally but
     /// needs to be public because it's used in the macro expansion of the
     /// plugin init method.
     #[doc(hidden)]
-    pub unsafe fn new(argc: c_int, argv: *mut *mut c_char) -> Args {
-        let argc = argc as isize;
-        let args: Vec<String> = (0..argc)
+    pub unsafe fn new(argc: c_int, argv: *mut *mut c_char, argv_eol: *mut *mut c_char) -> Args {
+        let eol =
+            if argv_eol.is_null() { Vec::new() } else { unsafe { Args::strings(argc, argv_eol) } };
+
+        Args { iter: unsafe { Args::strings(argc, argv) }.into_iter(), eol }
+    }
+
+    unsafe fn strings(argc: c_int, argv: *mut *mut c_char) -> Vec<String> {
+        (0..argc as isize)
             .map(|i| {
                 let cstr = unsafe { CStr::from_ptr(*argv.offset(i) as *const libc::c_char) };
 
                 String::from_utf8_lossy(cstr.to_bytes()).to_string()
             })
-            .collect();
-        Args { iter: args.into_iter() }
+            .collect()
+    }
+
+    /// The rest of the command line from argument `index` on, as the user
+    /// typed it, with runs of whitespace preserved.
+    ///
+    /// `None` when the command was hooked without `argv_eol`, or when
+    /// `index` is past the last argument.
+    pub fn rest(&self, index: usize) -> Option<&str> {
+        self.eol.get(index).map(String::as_str)
     }
 }
 

@@ -198,7 +198,7 @@ pub fn plugin(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 Weechat::init_from_ptr(plugin)
             };
 
-            let args = unsafe { Args::new(argc, argv) };
+            let args = unsafe { Args::new(argc, argv, std::ptr::null_mut()) };
 
             match <#plugin as ::weechat::Plugin>::init(&weechat, args) {
                 Ok(p) => {
